@@ -1,6 +1,6 @@
-# Coin Flip ☘️
+# Probability Sim ☘️
 
-A minimalist coin-flip game. Click the coin — heads or tails.
+A minimalist coin-flip probability simulator. Click the coin — heads or tails.
 
 ## Features
 
