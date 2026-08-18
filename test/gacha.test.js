@@ -30,12 +30,6 @@ function checkClose( label, actual, expected, tolerance ) {
 		console.error( `FAIL: ${ label } — expected ${ expected } ± ${ tolerance }, got ${ actual }` );
 	}
 }
-function checkTrue( label, condition ) {
-	if ( !condition ) {
-		failures += 1;
-		console.error( `FAIL: ${ label }` );
-	}
-}
 
 // parseSsrPercent: valid decimal percentages are accepted
 check( "parseSsrPercent( '3' )", parseSsrPercent( "3" ), 3 );
@@ -95,45 +89,6 @@ for ( let i = 0; i < trials; i += 1 ) {
 	}
 }
 checkClose( "observed SSR % at 3% over 1M rolls", ( ssrCount / trials ) * 100, 3, 0.3 );
-
-// normalizeWaifuImages: a real provider payload maps onto ImageRecord
-const payload = {
-	items: [
-		{ id: 1, url: "https://cdn.example/1.jpg", source: "https://pixiv.example/1", artists: [ { name: "artist-a" } ], width: 900, height: 1200, isNsfw: false },
-		{ id: 2, url: "https://cdn.example/2.jpg", source: null, artists: [], width: 800, height: 1000, isNsfw: false },
-		{ id: 3, url: "not-a-url", source: null, artists: [], width: 800, height: 1000, isNsfw: false }
-	]
-};
-const records = normalizeWaifuImages( payload );
-check( "normalized count drops invalid url", records.length, 2 );
-check( "normalized id", records[0].id, 1 );
-check( "normalized artist name", records[0].artistName, "artist-a" );
-check( "normalized sourceUrl null", records[1].sourceUrl, null );
-check( "normalized isNsfw", records[0].isNsfw, false );
-checkTrue( "malformed payload throws", ( () => {
-	try {
-		normalizeWaifuImages( {} );
-		return false;
-	} catch ( error ) {
-		return true;
-	}
-} )() );
-
-// dedupeById keeps first occurrences
-const duped = [ { id: 1, url: "a" }, { id: 2, url: "b" }, { id: 1, url: "a" } ];
-check( "dedupe length", dedupeById( duped ).length, 2 );
-
-// padRecords fills a short unique set without touching rarity
-const padded = padRecords( [ { id: 1, url: "a" }, { id: 2, url: "b" } ], 10 );
-check( "pad length", padded.length, 10 );
-check( "pad cycles", padded[9].id, 2 );
-
-// providerErrorFor maps the statuses the UI needs to explain
-check( "providerErrorFor( 403 )", providerErrorFor( 403 ), "forbidden" );
-check( "providerErrorFor( 429 )", providerErrorFor( 429 ), "rate-limited" );
-check( "providerErrorFor( 500 )", providerErrorFor( 500 ), "temporary" );
-check( "providerErrorFor( 502 )", providerErrorFor( 502 ), "temporary" );
-check( "providerErrorFor( 404 )", providerErrorFor( 404 ), "provider" );
 
 if ( failures > 0 ) {
 	console.error( `${ failures } check(s) failed` );

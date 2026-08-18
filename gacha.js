@@ -54,77 +54,24 @@ function tallyBatch( rarities ) {
 	return tally;
 }
 
-function normalizeWaifuImages( payload ) {
-	// Maps the provider payload onto the neutral ImageRecord shape so the UI never
-	// depends on Waifu.im field names; records without a usable URL are dropped
-	if ( !payload || !Array.isArray( payload.items ) ) {
-		throw new TypeError( "malformed" );
-	}
-	const records = [];
-	for ( const item of payload.items ) {
-		if ( typeof item.url !== "string" || !/^https?:\/\//.test( item.url ) ) {
-			continue;
-		}
-		records.push( {
-			  id        : item.id
-			, url       : item.url
-			, sourceUrl : typeof item.source === "string" ? item.source : null
-			, artistName: item.artists && item.artists[0] && typeof item.artists[0].name === "string" ? item.artists[0].name : null
-			, width     : item.width
-			, height    : item.height
-			, isNsfw    : Boolean( item.isNsfw )
-		} );
-	}
-	return records;
-}
-
-function dedupeById( records ) {
-	// First occurrence wins so a ten-pull stays visually varied
-	const seen   = new Set();
-	const unique = [];
-	for ( const record of records ) {
-		if ( !seen.has( record.id ) ) {
-			seen.add( record.id );
-			unique.push( record );
-		}
-	}
-	return unique;
-}
-
-function padRecords( records, amount ) {
-	// Reuses artwork when the provider cannot return enough unique images; rarity is
-	// assigned before images exist, so padding never changes an outcome
-	const padded = [];
-	for ( let i = 0; i < amount; i += 1 ) {
-		padded.push( records[ i % records.length ] );
-	}
-	return padded;
-}
-
-function providerErrorFor( status ) {
-	// Maps HTTP failures onto stable kinds so the UI can explain each failure mode
-	if ( status === 403 ) {
-		return "forbidden";
-	}
-	if ( status === 429 ) {
-		return "rate-limited";
-	}
-	if ( status >= 500 ) {
-		return "temporary";
-	}
-	return "provider";
-}
-
 /* ==== DOM WIRING ==== */
 
-const PULL_COUNT         = 10;
-const FETCH_TIMEOUT_MS   = 8000;
-const DUPLICATE_ATTEMPTS = 3;
+const PULL_COUNT = 10;
+
+// One bundled artwork serves every pull so the simulator never touches the image
+// API at runtime; rarity is still assigned independently, exactly as before
+const BUNDLED_IMAGE = {
+	  id        : 6881
+	, url       : "assets/gacha-waifu.jpg"
+	, sourceUrl : "https://www.pixiv.net/en/artworks/93407462"
+	, artistName: "FALL"
+	, width     : 369
+	, height    : 640
+	, isNsfw    : false
+};
 
 const state = {
 	  ssrPercent   : 3
-	, isLoading    : false
-	, results      : []
 	, sessionPulls : 0
 	, sessionSsr   : 0
 };
@@ -148,87 +95,12 @@ function validateInput() {
 		return;
 	}
 	state.ssrPercent    = parsed;
-	pullButton.disabled = state.isLoading;
+	pullButton.disabled = false;
 	errorLine.hidden    = true;
 }
 
-function providerErrorMessage( kind ) {
-	// Each failure kind gets a specific explanation so a retry is informed
-	switch ( kind ) {
-		case "timeout":
-			return "The image request timed out. Check your connection and try again.";
-		case "forbidden":
-			return "The image provider rejected the request (403). Try again later.";
-		case "rate-limited":
-			return "The image provider rate-limited the request (429). Wait a moment and try again.";
-		case "temporary":
-			return "The image provider hit a temporary error (5xx). Try again.";
-		case "network":
-			return "Could not reach the image provider. Check your connection.";
-		case "malformed":
-			return "The image provider returned an unexpected response. Try again.";
-		default:
-			return "The image provider rejected the request. Try again.";
-	}
-}
-
-async function fetchImages( amount ) {
-	// Waifu.im returns random SFW artwork; the query asks for one page of `amount`
-	const params = new URLSearchParams( {
-		  IncludedTags: "waifu"
-		, IsNsfw      : "False"
-		, PageSize    : String( amount )
-	} );
-	const controller = new AbortController();
-	const timer      = setTimeout( () => controller.abort(), FETCH_TIMEOUT_MS );
-	let response;
-	try {
-		response = await fetch( `https://api.waifu.im/images?${params.toString()}`, { signal: controller.signal } );
-	} catch ( error ) {
-		clearTimeout( timer );
-		if ( error.name === "AbortError" ) {
-			throw new Error( "timeout" );
-		}
-		throw new Error( "network" );
-	}
-	clearTimeout( timer );
-	if ( !response.ok ) {
-		throw new Error( providerErrorFor( response.status ) );
-	}
-	let payload;
-	try {
-		payload = await response.json();
-	} catch ( error ) {
-		throw new Error( "malformed" );
-	}
-	try {
-		return normalizeWaifuImages( payload );
-	} catch ( error ) {
-		throw new Error( "malformed" );
-	}
-}
-
-async function fetchUniqueImages( amount ) {
-	// Fetches pages and drops duplicates until the batch is full or the attempt
-	// limit is reached; the caller pads if the provider cannot cover the batch
-	const seen   = new Set();
-	const picked = [];
-	let attempts = 0;
-	while ( picked.length < amount && attempts < DUPLICATE_ATTEMPTS ) {
-		attempts += 1;
-		const batch = await fetchImages( amount );
-		for ( const record of dedupeById( batch ) ) {
-			if ( !seen.has( record.id ) ) {
-				seen.add( record.id );
-				picked.push( record );
-			}
-		}
-	}
-	return picked;
-}
-
 function renderResults( results ) {
-	// Each card is just artwork plus its rarity badge overlaid on the image
+	// Each card is the bundled artwork plus its rarity badge; the card links to the source
 	const fragment = document.createDocumentFragment();
 	for ( const result of results ) {
 		const li     = document.createElement( "li" );
@@ -275,74 +147,33 @@ function renderSummary( tally, ssrPercent ) {
 	sessionStatsLine.textContent = `Session — pulls: ${state.sessionPulls} · SSR: ${state.sessionSsr} · observed SSR rate: ${sessionRate.toFixed( 1 )}% (experimental)`;
 }
 
-function finishWithError( message ) {
-	// A failed image fetch discards the rarity batch so stale cards never linger;
-	// the next click starts a fresh batch (documented: retrying re-rolls everything)
-	state.isLoading = false;
-	state.results   = [];
-	resultsList.replaceChildren();
-	batchStatsLine.textContent   = "";
-	sessionStatsLine.textContent = "";
-	statusLine.textContent = message;
-	statusLine.hidden      = false;
-	pullButton.disabled  = parseSsrPercent( ssrInput.value ) === null;
-	clearButton.disabled = false;
-}
-
-async function runPull() {
-	// Guard first so the button cannot start a second batch while one is in flight
-	if ( state.isLoading ) {
-		return;
-	}
+function runPull() {
+	// The batch is instant and fully local, so every click simply rolls a fresh ten-pull
 	const ssrPercent = parseSsrPercent( ssrInput.value );
 	if ( ssrPercent === null ) {
 		validateInput();
 		return;
 	}
-	state.isLoading  = true;
-	state.results    = [];
 	resultsList.replaceChildren();
 	batchStatsLine.textContent   = "";
 	sessionStatsLine.textContent = "";
-	pullButton.disabled  = true;
-	clearButton.disabled = true;
-	statusLine.textContent = "Pulling 10×…";
-	statusLine.hidden      = false;
-	// Rarity never depends on artwork: rolls happen first, then images pair onto them
+	// Rarity never depends on artwork: rolls happen first, then the bundled image pairs on
 	const rarities = generateBatch( ssrPercent, PULL_COUNT );
-	let images;
-	try {
-		images = await fetchUniqueImages( PULL_COUNT );
-	} catch ( error ) {
-		finishWithError( providerErrorMessage( error.message ) );
-		return;
-	}
-	if ( images.length === 0 ) {
-		// Without any artwork the batch cannot render, so no fake cards are shown
-		finishWithError( "The image provider returned no usable artwork. Try again." );
-		return;
-	}
-	const records = padRecords( images, PULL_COUNT );
-	const results = rarities.map( ( rarity, index ) => ( {
-		  pullNumber : index + 1
-		, rarity     : rarity
-		, image      : records[ index ]
+	const results  = rarities.map( ( rarity ) => ( {
+		  rarity : rarity
+		, image  : BUNDLED_IMAGE
 	} ) );
 	const tally  = tallyBatch( rarities );
-	state.results = results;
 	state.sessionPulls += PULL_COUNT;
 	state.sessionSsr   += tally.ssr;
 	renderResults( results );
 	renderSummary( tally, ssrPercent );
-	state.isLoading  = false;
-	pullButton.disabled  = false;
-	clearButton.disabled = false;
 	statusLine.textContent = `Done — ${tally.ssr} SSR, ${tally.sr} SR, ${tally.r} R.`;
+	statusLine.hidden      = false;
 }
 
 function clearResults() {
 	// Clears displayed results without touching the configured percentage or session stats
-	state.results = [];
 	resultsList.replaceChildren();
 	batchStatsLine.textContent   = "";
 	sessionStatsLine.textContent = "";
@@ -355,4 +186,4 @@ clearButton.addEventListener( "click", clearResults );
 validateInput();
 
 // Expose the pure functions so node can test them without a DOM
-window.gachaSim = { parseSsrPercent, assignRarity, generateBatch, tallyBatch, normalizeWaifuImages, dedupeById, padRecords, providerErrorFor };
+window.gachaSim = { parseSsrPercent, assignRarity, generateBatch, tallyBatch };
