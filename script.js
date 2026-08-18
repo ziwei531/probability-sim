@@ -155,6 +155,7 @@ headsInput.addEventListener( "input", handleHeadsInput );
 tailsInput.addEventListener( "input", handleTailsInput );
 flipButton.addEventListener( "click", flipCoin );
 coin.addEventListener( "click", flipCoin );
+coinInner.addEventListener( "click", flipCoin );
 coin.addEventListener( "keydown", ( event ) => {
 	// Enter and Space activate the coin exactly like the flip button
 	if ( event.key === "Enter" || event.key === " " ) {

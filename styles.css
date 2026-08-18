@@ -55,8 +55,6 @@ h1 {
 	position: relative;
 	width: clamp( 160px, 40vw, 240px );
 	height: clamp( 160px, 40vw, 240px );
-	/* Perspective gives the coin real depth instead of a flat squash */
-	perspective: 900px;
 }
 
 .coin-shadow {
@@ -79,6 +77,8 @@ h1 {
 	/* The coin is a button now: click it, or focus it and press Enter or Space */
 	cursor: pointer;
 	user-select: none;
+	/* Perspective must sit on the parent of the rotating element, not a grandparent */
+	perspective: 900px;
 }
 
 .coin {
@@ -86,16 +86,6 @@ h1 {
 	width: 100%;
 	height: 100%;
 	transform-style: preserve-3d;
-}
-
-.coin::before {
-	/* A back layer offset in Z gives the coin visible thickness when it is edge-on mid-toss */
-	content: "";
-	position: absolute;
-	inset: 0;
-	border-radius: 50%;
-	background: linear-gradient( to bottom, #8a6e2f, #5d4a1f 50%, #8a6e2f );
-	transform: translateZ( -12px );
 }
 
 .coin-mover.flipping {
@@ -144,6 +134,8 @@ h1 {
 	display: grid;
 	place-items: center;
 	border-radius: 50%;
+	/* The border doubles as the visible edge when the coin is edge-on mid-toss */
+	border: 2px solid #5d4a1f;
 	/* Two radial gradients fake the convex dome of a struck coin */
 	background:
 		radial-gradient( ellipse farthest-corner at 35% 30%, #fff7c0 0%, #ffe680 12%, #d4af37 38%, #8a6e2f 78%, #5d4a1f 100% )
