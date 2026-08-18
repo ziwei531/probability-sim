@@ -40,6 +40,7 @@ const flipButton = document.querySelector( "#flip-button" );
 const resultLine = document.querySelector( "#result" );
 const statsLine  = document.querySelector( "#stats" );
 const coin       = document.querySelector( "#coin" );
+const coinInner  = coin.querySelector( ".coin" );
 const headsInput = document.querySelector( "#heads-input" );
 const tailsInput = document.querySelector( "#tails-input" );
 
@@ -124,7 +125,6 @@ function flipCoin() {
 	updateStats();
 	// The toss keyframes read these angles, so the next flip spins from where the last one landed
 	coin.style.setProperty( "--flip-from", `${from}deg` );
-	coin.style.setProperty( "--flip-mid", `${from + turn * 0.6}deg` );
 	coin.style.setProperty( "--flip-to", `${to}deg` );
 	// CSS has no replay API: remove, force reflow, re-add to restart with the new angles
 	coin.classList.remove( "flipping" );
@@ -148,7 +148,7 @@ function flipCoin() {
 function finalizeToss( to ) {
 	flipButton.disabled   = false;
 	coin.classList.remove( "flipping" );
-	coin.style.transform = `rotateX(${to}deg)`;
+	coinInner.style.transform = `rotateX(${to}deg)`;
 }
 
 headsInput.addEventListener( "input", handleHeadsInput );

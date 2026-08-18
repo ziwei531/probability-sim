@@ -52,19 +52,39 @@ h1 {
 }
 
 .scene {
+	position: relative;
 	width: clamp( 160px, 40vw, 240px );
 	height: clamp( 160px, 40vw, 240px );
 	/* Perspective gives the coin real depth instead of a flat squash */
 	perspective: 900px;
 }
 
-.coin {
+.coin-shadow {
+	position: absolute;
+	left: 50%;
+	bottom: -14px;
+	width: 72%;
+	height: 16px;
+	margin-left: -36%;
+	border-radius: 50%;
+	/* Soft ellipse reads as the coin's shadow on the ground */
+	background: radial-gradient( ellipse, rgba( 0, 0, 0, 0.22 ), transparent 70% );
+	pointer-events: none;
+}
+
+.coin-mover {
 	position: relative;
 	width: 100%;
 	height: 100%;
 	/* The coin is a button now: click it, or focus it and press Enter or Space */
 	cursor: pointer;
 	user-select: none;
+}
+
+.coin {
+	position: relative;
+	width: 100%;
+	height: 100%;
 	transform-style: preserve-3d;
 }
 
@@ -78,23 +98,44 @@ h1 {
 	transform: translateZ( -12px );
 }
 
-.coin.flipping {
-	/* Toss reads its start/mid/end angles from custom properties set by script.js */
-	animation: toss 1s cubic-bezier( 0.33, 0, 0.2, 1 ) forwards;
+.coin-mover.flipping {
+	/* The arc carries the coin up and down with gravity easings per segment */
+	animation: toss-arc 1s;
 }
 
-.coin:focus-visible {
+.coin-mover.flipping .coin {
+	/* The spin runs at constant angular speed, exactly like a real tossed coin */
+	animation: toss-spin 1s linear forwards;
+}
+
+.coin-mover.flipping ~ .coin-shadow {
+	/* The ground shadow shrinks and fades as the coin rises, returns as it falls */
+	animation: toss-shadow 1s;
+}
+
+.coin-mover:focus-visible {
 	/* Keyboard focus gets a clear ring around the round coin */
 	outline: 2px solid var( --accent );
 	outline-offset: 6px;
 	border-radius: 50%;
 }
 
-@keyframes toss {
-	/* Rise fast, hang, then fall — the arc sells the toss as much as the spin */
-	0%   { transform: rotateX( var( --flip-from, 0deg ) ) translateY( 0 ); }
-	40%  { transform: rotateX( var( --flip-mid, 1800deg ) ) translateY( -140px ); }
-	100% { transform: rotateX( var( --flip-to, 1800deg ) ) translateY( 0 ); }
+@keyframes toss-arc {
+	/* Ease-out on the rise (fast launch, slow at apex), ease-in on the fall (slow drop, fast land) */
+	0%   { transform: translateY( 0 ) scale( 1 ); animation-timing-function: ease-out; }
+	45%  { transform: translateY( -150px ) scale( 0.94 ); animation-timing-function: ease-in; }
+	100% { transform: translateY( 0 ) scale( 1 ); }
+}
+
+@keyframes toss-spin {
+	0%   { transform: rotateX( var( --flip-from, 0deg ) ); }
+	100% { transform: rotateX( var( --flip-to, 1800deg ) ); }
+}
+
+@keyframes toss-shadow {
+	0%   { transform: scale( 1 ); opacity: 0.7; }
+	45%  { transform: scale( 0.5 ); opacity: 0.2; }
+	100% { transform: scale( 1 ); opacity: 0.7; }
 }
 
 .coin-face {

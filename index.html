@@ -11,9 +11,12 @@
 	<main class="app">
 		<h1>Coin Flip</h1>
 		<div class="scene">
-			<div class="coin" id="coin" role="button" tabindex="0" aria-label="Flip the coin">
-				<div class="coin-face coin-heads" aria-hidden="true">H</div>
-				<div class="coin-face coin-tails" aria-hidden="true">T</div>
+			<div class="coin-shadow" aria-hidden="true"></div>
+			<div class="coin-mover" id="coin" role="button" tabindex="0" aria-label="Flip the coin">
+				<div class="coin">
+					<div class="coin-face coin-heads" aria-hidden="true">H</div>
+					<div class="coin-face coin-tails" aria-hidden="true">T</div>
+				</div>
 			</div>
 		</div>
 		<div class="controls">
