@@ -228,7 +228,7 @@ async function fetchUniqueImages( amount ) {
 }
 
 function renderResults( results ) {
-	// Each card pairs artwork with its pre-assigned rarity; alt text names both
+	// Each card is just artwork plus its rarity badge overlaid on the image
 	const fragment = document.createDocumentFragment();
 	for ( const result of results ) {
 		const li     = document.createElement( "li" );
@@ -237,35 +237,20 @@ function renderResults( results ) {
 		media.className = "card-media";
 		const img    = document.createElement( "img" );
 		img.src      = result.image.url;
-		img.alt      = `Random anime character artwork, ${result.rarity} rarity, pull ${result.pullNumber}`;
+		img.alt      = `Anime character artwork, ${result.rarity} rarity`;
 		img.loading  = "lazy";
 		img.addEventListener( "error", () => {
-			// A broken artwork URL swaps to a labelled placeholder instead of an empty box
+			// A broken artwork URL swaps to a labelled placeholder; the badge stays
 			const fallback     = document.createElement( "span" );
 			fallback.className  = "card-fallback";
 			fallback.textContent = "Image unavailable";
-			media.replaceChildren( fallback );
+			img.replaceWith( fallback );
 		}, { once: true } );
-		media.appendChild( img );
-		const info  = document.createElement( "div" );
-		info.className = "card-info";
 		const badge = document.createElement( "span" );
 		badge.className  = "rarity-badge";
 		badge.textContent = result.rarity;
-		const pull  = document.createElement( "span" );
-		pull.className   = "pull-number";
-		pull.textContent = `Pull #${result.pullNumber}`;
-		info.append( badge, pull );
-		li.append( media, info );
-		if ( result.image.sourceUrl ) {
-			const link    = document.createElement( "a" );
-			link.className  = "card-source";
-			link.href       = result.image.sourceUrl;
-			link.target     = "_blank";
-			link.rel        = "noopener noreferrer";
-			link.textContent = result.image.artistName ? `Artist: ${result.image.artistName}` : "View source";
-			li.appendChild( link );
-		}
+		media.append( img, badge );
+		li.appendChild( media );
 		fragment.appendChild( li );
 	}
 	resultsList.appendChild( fragment );

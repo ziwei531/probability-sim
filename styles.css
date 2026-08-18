@@ -328,10 +328,10 @@ button:disabled {
 }
 
 .results-grid {
-	/* Auto-fill keeps cards at a stable portrait size and wraps on narrow screens */
+	/* Exactly five cards per row, gacha-style, at every viewport width */
 	display: grid;
-	grid-template-columns: repeat( auto-fill, minmax( 130px, 1fr ) );
-	gap: 12px;
+	grid-template-columns: repeat( 5, 1fr );
+	gap: 8px;
 	width: 100%;
 	margin: 0;
 	padding: 0;
@@ -339,11 +339,9 @@ button:disabled {
 }
 
 .card {
-	display: flex;
-	flex-direction: column;
 	overflow: hidden;
 	border: 2px solid var( --border );
-	border-radius: 12px;
+	border-radius: 10px;
 	background: var( --bg );
 }
 
@@ -368,35 +366,17 @@ button:disabled {
 	font-size: 0.75rem;
 }
 
-.card-info {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 6px;
-	padding: 10px 10px 6px;
-}
-
 .rarity-badge {
-	padding: 2px 8px;
+	/* The badge sits inside the artwork so each card is just image plus rarity */
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	padding: 2px 7px;
 	border-radius: 999px;
-	font-size: 0.75rem;
+	font-size: 0.7rem;
 	font-weight: 700;
 	letter-spacing: 0.04em;
-}
-
-.pull-number {
-	color: var( --muted );
-	font-size: 0.75rem;
-}
-
-.card-source {
-	display: block;
-	padding: 0 10px 10px;
-	overflow: hidden;
-	color: var( --muted );
-	font-size: 0.75rem;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.35 );
 }
 
 .card-ssr {
