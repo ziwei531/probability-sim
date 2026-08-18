@@ -133,12 +133,22 @@ function flipCoin() {
 	// Clear before set so identical consecutive outcomes still announce on screen readers
 	resultLine.textContent = "";
 	resultLine.textContent = outcome === "heads" ? "Heads!" : "Tails!";
-	// Button and coin stay locked for the full 1s toss so flips cannot stack
+	// Release the lock when the toss animation actually ends, never on a fixed timer
+	coin.addEventListener( "animationend", () => {
+		finalizeToss( to );
+	}, { once: true } );
+	// Safety net in case animationend is swallowed; the guard keeps it idempotent
 	setTimeout( () => {
-		flipButton.disabled   = false;
-		coin.classList.remove( "flipping" );
-		coin.style.transform = `rotateX(${to}deg)`;
-	}, 1000 );
+		if ( flipButton.disabled ) {
+			finalizeToss( to );
+		}
+	}, 1200 );
+}
+
+function finalizeToss( to ) {
+	flipButton.disabled   = false;
+	coin.classList.remove( "flipping" );
+	coin.style.transform = `rotateX(${to}deg)`;
 }
 
 headsInput.addEventListener( "input", handleHeadsInput );
