@@ -27,8 +27,10 @@
 body {
 	margin: 0;
 	min-height: 100dvh;
-	display: grid;
-	place-items: center;
+	/* Flex column keeps the nav above the app; the app's auto margin does the centring */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 	background: var( --bg );
 	color: var( --fg );
 	font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
@@ -43,6 +45,8 @@ body {
 	gap: 24px;
 	width: 100%;
 	max-width: 34rem;
+	/* Auto margins centre the app when the page is short and scroll cleanly when it is not */
+	margin: auto 0;
 }
 
 h1 {
@@ -254,9 +258,204 @@ button:disabled {
 	color: var( --muted );
 }
 
+.site-nav {
+	display: flex;
+	gap: 4px;
+	width: 100%;
+	max-width: 34rem;
+	margin-bottom: 8px;
+	border-bottom: 1px solid var( --border );
+}
+
+.nav-link {
+	padding: 12px 16px;
+	margin-bottom: -1px;
+	border-bottom: 2px solid transparent;
+	color: var( --muted );
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.nav-link:hover {
+	background: var( --hover );
+	color: var( --fg );
+}
+
+.nav-link.active {
+	/* The active page keeps the accent underline so the current tab is obvious */
+	border-bottom-color: var( --accent );
+	color: var( --accent );
+}
+
+.gacha-controls {
+	display: flex;
+	align-items: flex-end;
+	gap: 16px;
+	width: 100%;
+}
+
+.percent-input-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.percent-input-row input {
+	width: 6rem;
+}
+
+.percent-suffix {
+	color: var( --muted );
+	font-size: 0.875rem;
+}
+
+.button-row {
+	display: flex;
+	gap: 8px;
+}
+
+.field-error {
+	margin: 0;
+	width: 100%;
+	color: #dc2626;
+	font-size: 0.875rem;
+}
+
+.status {
+	margin: 0;
+	min-height: 1.5em;
+	color: var( --muted );
+}
+
+.results-grid {
+	/* Auto-fill keeps cards at a stable portrait size and wraps on narrow screens */
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 130px, 1fr ) );
+	gap: 12px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: 2px solid var( --border );
+	border-radius: 12px;
+	background: var( --bg );
+}
+
+.card-media {
+	position: relative;
+	aspect-ratio: 3 / 4;
+	background: var( --hover );
+}
+
+.card-media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.card-fallback {
+	display: grid;
+	place-items: center;
+	height: 100%;
+	color: var( --muted );
+	font-size: 0.75rem;
+}
+
+.card-info {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px;
+	padding: 10px 10px 6px;
+}
+
+.rarity-badge {
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.pull-number {
+	color: var( --muted );
+	font-size: 0.75rem;
+}
+
+.card-source {
+	display: block;
+	padding: 0 10px 10px;
+	overflow: hidden;
+	color: var( --muted );
+	font-size: 0.75rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.card-ssr {
+	/* Gold reads as the top rarity; the glow stays subtle so the art is the focus */
+	border-color: #d4af37;
+	box-shadow: 0 0 12px rgba( 212, 175, 55, 0.35 );
+}
+
+.card-ssr .rarity-badge {
+	background: #d4af37;
+	color: #3f2d00;
+}
+
+.card-sr {
+	border-color: #a855f7;
+}
+
+.card-sr .rarity-badge {
+	background: #a855f7;
+	color: #1e1033;
+}
+
+.card-r {
+	border-color: #3b82f6;
+}
+
+.card-r .rarity-badge {
+	background: #3b82f6;
+	color: #0b1d33;
+}
+
+.summary {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+}
+
+.attribution {
+	margin: 0;
+	color: var( --muted );
+	font-size: 0.75rem;
+}
+
+.attribution a {
+	color: var( --accent );
+}
+
 @media ( max-width: 600px ) {
 	/* Inputs stack under 600px so each field keeps a comfortable tap target */
 	.controls {
 		flex-direction: column;
+	}
+	/* Gacha controls and buttons stack so the pull button stays a full-width tap target */
+	.gacha-controls {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.button-row button {
+		flex: 1;
 	}
 }

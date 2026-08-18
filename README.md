@@ -5,6 +5,8 @@ A minimalist coin-flip probability simulator. Click the coin — heads or tails.
 ## Features
 
 - Flip a coin with a click
+- **Gacha Simulator** tab — set an SSR rate and pull ten cards with random
+  SFW artwork from Waifu.im (SSR / SR / R distribution, exact per-pull odds)
 - Configure the heads/tails percentage — the other side reflects
   automatically (always sums to exactly 100)
 - Meticulous float-safe math (integer basis points, no drift)

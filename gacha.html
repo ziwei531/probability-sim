@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<title>Gacha Simulator · Probability Sim</title>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
+	<link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body>
+	<nav class="site-nav" aria-label="Simulators">
+		<a class="nav-link" href="index.html">Coin Flip</a>
+		<a class="nav-link active" href="gacha.html" aria-current="page">Gacha Simulator</a>
+	</nav>
+	<main class="app">
+		<h1>Gacha Simulator</h1>
+		<div class="gacha-controls">
+			<label class="percent-field" for="ssr-input">
+				<span>SSR probability</span>
+				<span class="percent-input-row">
+					<input id="ssr-input" type="number" min="0" max="100" step="0.1" value="3" inputmode="decimal">
+					<span class="percent-suffix">%</span>
+				</span>
+			</label>
+			<div class="button-row">
+				<button id="pull-button" type="button">10 Pulls</button>
+				<button id="clear-button" type="button">Clear</button>
+			</div>
+		</div>
+		<p class="field-error" id="ssr-error" role="alert" hidden></p>
+		<p class="status" id="status" aria-live="polite" hidden></p>
+		<ol class="results-grid" id="results" aria-label="Pull results"></ol>
+		<section class="summary" aria-label="Pull summary">
+			<p class="stats" id="batch-stats"></p>
+			<p class="stats" id="session-stats"></p>
+		</section>
+		<p class="attribution">Artwork provided by <a href="https://waifu.im" target="_blank" rel="noopener noreferrer">Waifu.im</a></p>
+	</main>
+	<script src="gacha.js?v=5"></script>
+</body>
+</html>
