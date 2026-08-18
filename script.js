@@ -32,10 +32,13 @@ const state = {
 	, isMirroring: false
 	, face       : "heads"
 	, rotation   : 0
+	, headsCount : 0
+	, tailsCount : 0
 };
 
 const flipButton = document.querySelector( "#flip-button" );
 const resultLine = document.querySelector( "#result" );
+const statsLine  = document.querySelector( "#stats" );
 const coin       = document.querySelector( "#coin" );
 const headsInput = document.querySelector( "#heads-input" );
 const tailsInput = document.querySelector( "#tails-input" );
@@ -52,6 +55,19 @@ function setMirroredDisplay( field, bp ) {
 	state.isMirroring = false;
 }
 
+function updateStats() {
+	statsLine.textContent = `Heads: ${state.headsCount} · Tails: ${state.tailsCount}`;
+}
+
+// A changed percentage makes old counts meaningless, so the tally starts over
+function resetCountsOnBpChange( previousBp ) {
+	if ( state.headsBp !== previousBp ) {
+		state.headsCount = 0;
+		state.tailsCount = 0;
+		updateStats();
+	}
+}
+
 function handleHeadsInput( event ) {
 	if ( state.isMirroring ) {
 		return;
@@ -61,12 +77,14 @@ function handleHeadsInput( event ) {
 		// Mid-edit empty or partial values keep the last valid state
 		return;
 	}
+	const previousBp = state.headsBp;
 	state.headsBp = clampBp( toBp( raw ) );
 	// Out-of-range typing writes the clamp back so the visible pair always sums to 100
 	if ( raw < 0 || raw > 100 ) {
 		event.target.value = fromBp( state.headsBp );
 	}
 	setMirroredDisplay( tailsInput, mirror( state.headsBp ) );
+	resetCountsOnBpChange( previousBp );
 }
 
 function handleTailsInput( event ) {
@@ -77,33 +95,63 @@ function handleTailsInput( event ) {
 	if ( Number.isNaN( raw ) ) {
 		return;
 	}
+	const previousBp = state.headsBp;
 	state.headsBp = clampBp( mirror( toBp( raw ) ) );
+	if ( raw < 0 || raw > 100 ) {
+		event.target.value = fromBp( mirror( state.headsBp ) );
+	}
 	setMirroredDisplay( headsInput, state.headsBp );
+	resetCountsOnBpChange( previousBp );
 }
 
-function handleFlipClick() {
+function flipCoin() {
 	if ( flipButton.disabled ) {
 		return;
 	}
 	flipButton.disabled = true;
-	const outcome = flipToss( state.headsBp );
+	const outcome  = flipToss( state.headsBp );
+	const from     = state.rotation;
 	// Even half-turns land the same face, odd half-turns land the opposite; pick so the face matches the outcome
-	const turn = outcome === state.face ? 1800 : 1620;
-	state.face       = outcome;
-	state.rotation  += turn;
-	coin.style.transform = `rotateY(${state.rotation}deg)`;
+	const turn     = outcome === state.face ? 1800 : 1620;
+	const to       = from + turn;
+	state.face     = outcome;
+	state.rotation = to;
+	if ( outcome === "heads" ) {
+		state.headsCount += 1;
+	} else {
+		state.tailsCount += 1;
+	}
+	updateStats();
+	// The toss keyframes read these angles, so the next flip spins from where the last one landed
+	coin.style.setProperty( "--flip-from", `${from}deg` );
+	coin.style.setProperty( "--flip-mid", `${from + turn * 0.6}deg` );
+	coin.style.setProperty( "--flip-to", `${to}deg` );
+	// CSS has no replay API: remove, force reflow, re-add to restart with the new angles
+	coin.classList.remove( "flipping" );
+	void coin.offsetWidth;
+	coin.classList.add( "flipping" );
 	// Clear before set so identical consecutive outcomes still announce on screen readers
 	resultLine.textContent = "";
 	resultLine.textContent = outcome === "heads" ? "Heads!" : "Tails!";
-	// Button stays disabled for the full 0.7s transition so flips cannot stack
+	// Button and coin stay locked for the full 1s toss so flips cannot stack
 	setTimeout( () => {
-		flipButton.disabled = false;
-	}, 700 );
+		flipButton.disabled   = false;
+		coin.classList.remove( "flipping" );
+		coin.style.transform = `rotateX(${to}deg)`;
+	}, 1000 );
 }
 
 headsInput.addEventListener( "input", handleHeadsInput );
 tailsInput.addEventListener( "input", handleTailsInput );
-flipButton.addEventListener( "click", handleFlipClick );
+flipButton.addEventListener( "click", flipCoin );
+coin.addEventListener( "click", flipCoin );
+coin.addEventListener( "keydown", ( event ) => {
+	// Enter and Space activate the coin exactly like the flip button
+	if ( event.key === "Enter" || event.key === " " ) {
+		event.preventDefault();
+		flipCoin();
+	}
+} );
 
 // Expose the pure functions so node can test them without a DOM
 window.coinFlip = { toBp, fromBp, mirror, flipHeadsBp, flipToss };
