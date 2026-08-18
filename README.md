@@ -13,7 +13,7 @@ A minimalist coin-flip game. Click the coin — heads or tails.
 ## Live
 
 Published with GitHub Pages via GitHub Actions:
-https://ziwei531.github.io/coin-flip/
+https://ziwei531.github.io/probability-sim/
 
 ## Development
 
