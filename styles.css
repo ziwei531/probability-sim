@@ -91,6 +91,8 @@ h1 {
 .coin-mover.flipping {
 	/* The arc carries the coin up and down with gravity easings per segment */
 	animation: toss-arc 1s;
+	/* While the toss runs the coin ignores clicks, so a rapid click cannot queue another flip */
+	pointer-events: none;
 }
 
 .coin-mover.flipping .coin {

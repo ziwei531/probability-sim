@@ -30,6 +30,7 @@ function flipToss( headsBp ) {
 const state = {
 	  headsBp    : 5000
 	, isMirroring: false
+	, isFlipping : false
 	, face       : "heads"
 	, rotation   : 0
 	, headsCount : 0
@@ -106,9 +107,11 @@ function handleTailsInput( event ) {
 }
 
 function flipCoin() {
-	if ( flipButton.disabled ) {
+	// One toss at a time: the flag is set before the animation starts and released only when it ends
+	if ( state.isFlipping ) {
 		return;
 	}
+	state.isFlipping    = true;
 	flipButton.disabled = true;
 	const outcome  = flipToss( state.headsBp );
 	const from     = state.rotation;
@@ -133,19 +136,15 @@ function flipCoin() {
 	// Clear before set so identical consecutive outcomes still announce on screen readers
 	resultLine.textContent = "";
 	resultLine.textContent = outcome === "heads" ? "Heads!" : "Tails!";
-	// Release the lock when the toss animation actually ends, never on a fixed timer
-	coin.addEventListener( "animationend", () => {
-		finalizeToss( to );
-	}, { once: true } );
-	// Safety net in case animationend is swallowed; the guard keeps it idempotent
+	// Release exactly when the 1s toss completes: a fixed timer aligned to the animation duration
+	// is deterministic, unlike animationend which can fire early when the inner spin's event bubbles
 	setTimeout( () => {
-		if ( flipButton.disabled ) {
-			finalizeToss( to );
-		}
-	}, 1200 );
+		finalizeToss( to );
+	}, 1000 );
 }
 
 function finalizeToss( to ) {
+	state.isFlipping      = false;
 	flipButton.disabled   = false;
 	coin.classList.remove( "flipping" );
 	coinInner.style.transform = `rotateX(${to}deg)`;
