@@ -1,0 +1,167 @@
+:root {
+	/* color-scheme keeps native spinners and scrollbars on theme in dark mode */
+	color-scheme: light dark;
+	--bg: #fafaf9;
+	--fg: #1c1917;
+	--muted: #78716c;
+	--accent: #0f766e;
+	--border: #e7e5e4;
+	--hover: rgba( 28, 25, 23, 0.06 );
+}
+
+@media ( prefers-color-scheme: dark ) {
+	:root {
+		--bg: #171717;
+		--fg: #f5f5f4;
+		--muted: #a8a29e;
+		--accent: #5eead4;
+		--border: #262626;
+		--hover: rgba( 245, 245, 244, 0.08 );
+	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	display: grid;
+	place-items: center;
+	background: var( --bg );
+	color: var( --fg );
+	font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+	/* Safe-area insets keep the column clear of notches and home indicators */
+	padding: calc( env( safe-area-inset-top ) + 24px ) calc( env( safe-area-inset-right ) + 24px ) calc( env( safe-area-inset-bottom ) + 24px ) calc( env( safe-area-inset-left ) + 24px );
+}
+
+.app {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 24px;
+	width: 100%;
+	max-width: 34rem;
+}
+
+h1 {
+	margin: 0;
+	font-size: clamp( 1.5rem, 5vw, 2.25rem );
+	font-weight: 600;
+}
+
+.scene {
+	width: clamp( 160px, 40vw, 240px );
+	height: clamp( 160px, 40vw, 240px );
+	/* Perspective gives the coin real depth instead of a flat squash */
+	perspective: 900px;
+}
+
+.coin {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	transition: transform 0.7s cubic-bezier( 0.4, 0, 0.2, 1 );
+}
+
+.coin-face {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	border: 1px solid var( --border );
+	border-radius: 50%;
+	background: var( --bg );
+	color: var( --accent );
+	font-size: clamp( 3rem, 12vw, 4.5rem );
+	font-weight: 600;
+	backface-visibility: hidden;
+}
+
+.coin-tails {
+	/* Tails starts rotated so it is the hidden back until the coin flips */
+	transform: rotateY( 180deg );
+}
+
+.controls {
+	display: flex;
+	gap: 16px;
+	width: 100%;
+}
+
+.percent-field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+	color: var( --muted );
+	font-size: 0.875rem;
+}
+
+input {
+	min-height: 44px;
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid var( --border );
+	border-radius: 8px;
+	background: transparent;
+	color: var( --fg );
+	font: inherit;
+	font-size: 16px; /* 16px stops iOS from auto-zooming the focused field */
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+}
+
+input:focus {
+	border-color: var( --accent );
+}
+
+input:focus-visible,
+button:focus-visible {
+	/* Keyboard focus keeps a visible ring instead of relying on the border tint alone */
+	outline: 2px solid var( --accent );
+	outline-offset: 2px;
+}
+
+button {
+	min-height: 48px;
+	padding: 14px 32px;
+	border: 1px solid var( --border );
+	border-radius: 999px;
+	background: transparent;
+	color: var( --fg );
+	font: inherit;
+	font-size: 1rem;
+	cursor: pointer;
+	transition: background 120ms ease, transform 120ms ease;
+}
+
+button:hover {
+	background: var( --hover );
+}
+
+button:active {
+	transform: scale( 0.98 );
+}
+
+button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.result {
+	margin: 0;
+	min-height: 1.5em;
+	font-weight: 600;
+	color: var( --muted );
+}
+
+@media ( max-width: 600px ) {
+	/* Inputs stack under 600px so each field keeps a comfortable tap target */
+	.controls {
+		flex-direction: column;
+	}
+}
