@@ -173,11 +173,13 @@ function runPull() {
 }
 
 function clearResults() {
-	// Clears displayed results without touching the configured percentage or session stats
+	// Clears displayed results and resets the session tally; the percentage stays
 	resultsList.replaceChildren();
 	batchStatsLine.textContent   = "";
 	sessionStatsLine.textContent = "";
 	statusLine.hidden = true;
+	state.sessionPulls = 0;
+	state.sessionSsr   = 0;
 }
 
 ssrInput.addEventListener( "input", validateInput );
