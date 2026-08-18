@@ -356,6 +356,7 @@ button:disabled {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	transition: transform 150ms ease;
 }
 
 .card-fallback {
@@ -364,6 +365,23 @@ button:disabled {
 	height: 100%;
 	color: var( --muted );
 	font-size: 0.75rem;
+}
+
+.card-link {
+	display: block;
+	text-decoration: none;
+}
+
+.card-link:focus-visible {
+	/* Keyboard focus on a card link gets the same ring as buttons and inputs */
+	outline: 2px solid var( --accent );
+	outline-offset: 2px;
+	border-radius: 8px;
+}
+
+.card:hover .card-media img {
+	/* A gentle zoom signals the card is clickable without hiding the artwork */
+	transform: scale( 1.03 );
 }
 
 .rarity-badge {

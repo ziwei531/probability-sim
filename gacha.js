@@ -250,7 +250,19 @@ function renderResults( results ) {
 		badge.className  = "rarity-badge";
 		badge.textContent = result.rarity;
 		media.append( img, badge );
-		li.appendChild( media );
+		if ( result.image.sourceUrl ) {
+			// Cards with a source open it in a new tab; the rarity badge stays put
+			const link    = document.createElement( "a" );
+			link.className  = "card-link";
+			link.href       = result.image.sourceUrl;
+			link.target     = "_blank";
+			link.rel        = "noopener noreferrer";
+			link.setAttribute( "aria-label", `View artwork source (${result.rarity})` );
+			link.appendChild( media );
+			li.appendChild( link );
+		} else {
+			li.appendChild( media );
+		}
 		fragment.appendChild( li );
 	}
 	resultsList.appendChild( fragment );
