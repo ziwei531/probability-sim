@@ -54,6 +54,29 @@ function tallyBatch( rarities ) {
 	return tally;
 }
 
+function expectedPullsPerSsr( ssrPercent ) {
+	// The sim has no pity, so pulls-to-first-SSR follow a geometric distribution;
+	// its mean is 1 / p, and p is the configured rate as a fraction (percent / 100)
+	if ( ssrPercent === 0 ) {
+		return Infinity;
+	}
+	return 100 / ssrPercent;
+}
+
+function expectedSsrSentence( ssrPercent ) {
+	// Pure wording so node can test it; a 0% rate never produces an SSR and a
+	// 100% rate guarantees one, so both get honest sentences instead of "∞" or
+	// a misleading "on average"; display rounds the exact expectation
+	if ( ssrPercent === 0 ) {
+		return "At a 0% SSR rate, an SSR never appears.";
+	}
+	if ( ssrPercent === 100 ) {
+		return "Every pull is an SSR.";
+	}
+	const pulls = Math.round( expectedPullsPerSsr( ssrPercent ) );
+	return `For every ${ pulls } pulls, you will get an SSR on average.`;
+}
+
 /* ==== DOM WIRING ==== */
 
 const PULL_COUNT = 10;
@@ -84,19 +107,23 @@ const statusLine       = document.querySelector( "#status" );
 const resultsList      = document.querySelector( "#results" );
 const batchStatsLine   = document.querySelector( "#batch-stats" );
 const sessionStatsLine = document.querySelector( "#session-stats" );
+const expectedSsrLine   = document.querySelector( "#expected-ssr-line" );
 
 function validateInput() {
 	// Invalid percentages disable pulling and explain why; nothing is silently clamped
 	const parsed = parseSsrPercent( ssrInput.value );
 	if ( parsed === null ) {
-		pullButton.disabled  = true;
-		errorLine.textContent = "Enter a percentage between 0 and 100.";
-		errorLine.hidden      = false;
+		pullButton.disabled    = true;
+		errorLine.textContent  = "Enter a percentage between 0 and 100.";
+		errorLine.hidden       = false;
+		expectedSsrLine.hidden = true;
 		return;
 	}
-	state.ssrPercent    = parsed;
-	pullButton.disabled = false;
-	errorLine.hidden    = true;
+	state.ssrPercent            = parsed;
+	pullButton.disabled         = false;
+	errorLine.hidden            = true;
+	expectedSsrLine.textContent = expectedSsrSentence( parsed );
+	expectedSsrLine.hidden      = false;
 }
 
 function renderResults( results ) {
@@ -188,4 +215,4 @@ clearButton.addEventListener( "click", clearResults );
 validateInput();
 
 // Expose the pure functions so node can test them without a DOM
-window.gachaSim = { parseSsrPercent, assignRarity, generateBatch, tallyBatch };
+window.gachaSim = { parseSsrPercent, assignRarity, generateBatch, tallyBatch, expectedPullsPerSsr, expectedSsrSentence };

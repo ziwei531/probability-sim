@@ -90,6 +90,37 @@ for ( let i = 0; i < trials; i += 1 ) {
 }
 checkClose( "observed SSR % at 3% over 1M rolls", ( ssrCount / trials ) * 100, 3, 0.3 );
 
+// expectedPullsPerSsr: geometric mean 1 / p is exact for the no-pity model
+checkClose( "expectedPullsPerSsr( 3 )", expectedPullsPerSsr( 3 ), 100 / 3, 1e-9 );
+checkClose( "expectedPullsPerSsr( 3.75 )", expectedPullsPerSsr( 3.75 ), 100 / 3.75, 1e-9 );
+check( "expectedPullsPerSsr( 100 )", expectedPullsPerSsr( 100 ), 1 );
+check( "expectedPullsPerSsr( 0 ) is Infinity", expectedPullsPerSsr( 0 ), Infinity );
+
+// expectedSsrSentence: wording stays testable and honest about "on average";
+// the expectation rounds to the nearest whole pull for display, and the 0% /
+// 100% endpoints get certainty-appropriate sentences instead of ∞ or "1 pull"
+check( "expectedSsrSentence( 3 )", expectedSsrSentence( 3 ), "For every 33 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 3.75 )", expectedSsrSentence( 3.75 ), "For every 27 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 7 )", expectedSsrSentence( 7 ), "For every 14 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 0.5 )", expectedSsrSentence( 0.5 ), "For every 200 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 8 ) rounds exact half up", expectedSsrSentence( 8 ), "For every 13 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 40 ) rounds exact half up", expectedSsrSentence( 40 ), "For every 3 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 100 )", expectedSsrSentence( 100 ), "Every pull is an SSR." );
+check( "expectedSsrSentence( 0 )", expectedSsrSentence( 0 ), "At a 0% SSR rate, an SSR never appears." );
+
+// Empirical geometric mean: first-SSR arrival over many trials must land near
+// the 1 / p theory — this pins the theorem, not just the implementation formula
+let arrivalSum  = 0;
+const arrivalCount = 200000;
+for ( let i = 0; i < arrivalCount; i += 1 ) {
+	let pulls = 0;
+	do {
+		pulls += 1;
+	} while ( assignRarity( 3, lcgRandom() * 100 ) !== "SSR" );
+	arrivalSum += pulls;
+}
+checkClose( "mean pulls to first SSR over 200k trials", arrivalSum / arrivalCount, 100 / 3, 0.5 );
+
 if ( failures > 0 ) {
 	console.error( `${ failures } check(s) failed` );
 	process.exit( 1 );
