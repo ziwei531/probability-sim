@@ -433,16 +433,6 @@ button:disabled {
 	width: 100%;
 }
 
-.attribution {
-	margin: 0;
-	color: var( --muted );
-	font-size: 0.75rem;
-}
-
-.attribution a {
-	color: var( --accent );
-}
-
 @media ( max-width: 600px ) {
 	/* Inputs stack under 600px so each field keeps a comfortable tap target */
 	.controls {

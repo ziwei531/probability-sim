@@ -24,7 +24,7 @@ step, no runtime API calls.
 - Each pull rolls independently: SSR at your configured rate, SR takes 20% of
   the remainder, R takes the rest
 - Rarity is assigned before artwork — the image never determines rarity
-- One bundled Waifu.im artwork (`assets/gacha-waifu.jpg`) serves every card,
+- One bundled artwork (`assets/gacha-waifu.jpg`) serves every card,
   so the simulator makes no runtime image requests and never risks rate limits
 - Click any card to open the artwork's source page
 - Batch summary plus a session tally with an observed SSR rate (labeled
