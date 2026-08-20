@@ -10,7 +10,10 @@ step, no runtime API calls.
 
 ### Coin Flip
 
-- Click the coin (or focus it and press Enter/Space) to toss
+- A lightweight inline-SVG recreation of Malaysia's third-series 50 sen coin:
+  Bunga Raya denomination face, Sulur Kacang motif face, security lines, and
+  the distinctive nine-indent edge—no runtime image asset
+- Click the coin (or focus it and press Enter/Space) to toss it
 - Configure the heads/tails percentages — the other side mirrors so the pair
   always sums to exactly 100%
 - Float-safe math: percentages live as integer basis points, so the display
