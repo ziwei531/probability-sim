@@ -255,4 +255,14 @@ clearButton.addEventListener( "click", clearResults );
 validateInput();
 
 // Expose the pure functions so node can test them without a DOM
-window.gachaSim = { parseSsrPercent, rarityPercentages, chanceAtLeastOneSsr, didProbabilityChange, assignRarity, generateBatch, tallyBatch, expectedPullsPerSsr, expectedSsrSentence };
+window.gachaSim = {
+	  parseSsrPercent
+	, rarityPercentages
+	, chanceAtLeastOneSsr
+	, didProbabilityChange
+	, assignRarity
+	, generateBatch
+	, tallyBatch
+	, expectedPullsPerSsr
+	, expectedSsrSentence
+};
