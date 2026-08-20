@@ -71,4 +71,5 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 
 ## Conventions
 
-See `AGENTS.md` → `context/zw-js-coding-preference.md`.
+- JavaScript: see `AGENTS.md` → `context/zw-js-coding-preference.md`.
+- Git commits: see [`git-commit-convention.md`](git-commit-convention.md).
