@@ -39,10 +39,15 @@ jobs:
         uses: actions/checkout@v7
       - name: Setup Pages
         uses: actions/configure-pages@v6
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site
+          cp index.html views/gacha.html _site/
+          cp -R assets js styles _site/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: "."
+          path: "_site"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

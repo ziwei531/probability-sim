@@ -3,7 +3,7 @@
 const fs   = require( "fs" );
 const path = require( "path" );
 
-const scriptPath = path.join( __dirname, "..", "script.js" );
+const scriptPath = path.join( __dirname, "..", "js", "script.js" );
 const source     = fs.readFileSync( scriptPath, "utf8" );
 
 const pureStart = source.indexOf( "/* ==== PURE MATH (node-testable) ==== */" );

@@ -60,7 +60,7 @@ global.document = {
 	}
 };
 
-const scriptPath = path.join( __dirname, "..", "gacha.js" );
+const scriptPath = path.join( __dirname, "..", "js", "gacha.js" );
 const source     = fs.readFileSync( scriptPath, "utf8" );
 eval( `${ source }\n;window.__gachaState = state;` );
 

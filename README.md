@@ -62,12 +62,12 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 
 ## Structure
 
-- `index.html` / `script.js` — coin flip
-- `gacha.html` / `gacha.js` — gacha simulator
-- `styles.css` — shared design tokens, nav, and page styles
+- `index.html` / `js/script.js` — coin flip
+- `views/gacha.html` / `js/gacha.js` — gacha simulator source
+- `styles/styles.css` — shared design tokens, nav, and page styles
 - `assets/gacha-waifu.jpg` — bundled gacha artwork
 - `test/` — node test harnesses
-- `.github/workflows/deploy.yml` — auto-deploys to GitHub Pages on push to `main`
+- `.github/workflows/deploy.yml` — assembles and deploys the public Pages artifact on push to `main`
 
 ## Conventions
 

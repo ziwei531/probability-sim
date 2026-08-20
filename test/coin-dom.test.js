@@ -69,7 +69,7 @@ global.document = {
 	}
 };
 
-const scriptPath = path.join( __dirname, "..", "script.js" );
+const scriptPath = path.join( __dirname, "..", "js", "script.js" );
 const source     = fs.readFileSync( scriptPath, "utf8" );
 eval( `${ source }\n;window.__coinState = state;` );
 
