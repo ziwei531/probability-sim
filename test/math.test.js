@@ -46,6 +46,12 @@ check( "fromBp( 9999 )", fromBp( 9999 ), "99.99" );
 check( "fromBp( 10000 )", fromBp( 10000 ), "100.00" );
 check( "fromBp( 0 )", fromBp( 0 ), "0.00" );
 
+// normalizePercentDisplay rounds excessive precision and clamps typed overflow
+check( "normalizePercentDisplay( '33.333' )", normalizePercentDisplay( "33.333" ), "33.33" );
+check( "normalizePercentDisplay( '150' )", normalizePercentDisplay( "150" ), "100.00" );
+check( "normalizePercentDisplay( '-20' )", normalizePercentDisplay( "-20" ), "0.00" );
+check( "normalizePercentDisplay( '' )", normalizePercentDisplay( "" ), null );
+
 // Boundary behaviour with a fixed Math.random so the edges are exact, not statistical
 function stubRandom( value ) {
 	Math.random = () => value;
@@ -73,10 +79,12 @@ Math.random = lcgRandom;
 const trials   = 400000;
 const headsBp  = 3725;
 let headsCount = 0;
-for ( let i = 0; i < trials; i += 1 ) {
+let trialIndex = 0;
+while ( trialIndex < trials ) {
 	if ( flipHeadsBp( headsBp ) ) {
 		headsCount += 1;
 	}
+	trialIndex += 1;
 }
 
 const observedFraction = headsCount / trials;

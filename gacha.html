@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<title>Gacha Simulator · Probability Sim</title>
 	<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
-	<link rel="stylesheet" href="styles.css?v=8">
+	<link rel="stylesheet" href="styles.css?v=9">
 	<script>
 		// Embed mode ( ?embed=1 ) hides the simulator nav and trims page chrome
 		// so the app sits cleanly inside a parent page's iframe ( game corner ).
@@ -19,30 +19,47 @@
 		<a class="nav-link" href="index.html">Coin Flip</a>
 		<a class="nav-link active" href="gacha.html" aria-current="page">Gacha Simulator</a>
 	</nav>
-	<main class="app">
-		<h1>Gacha Simulator</h1>
-		<div class="gacha-controls">
-			<label class="percent-field" for="ssr-input">
-				<span>SSR probability</span>
-				<span class="percent-input-row">
-					<input id="ssr-input" type="number" min="0" max="100" step="0.1" value="3" inputmode="decimal">
-					<span class="percent-suffix">%</span>
-				</span>
-			</label>
-			<div class="button-row">
-				<button id="pull-button" type="button">10 Pulls</button>
-				<button id="clear-button" type="button">Clear</button>
+	<main class="app gacha-app">
+		<header class="app-header">
+			<p class="eyebrow">Probability playground</p>
+			<h1>Gacha Simulator</h1>
+			<p class="app-intro">Set the SSR rate and test your luck—without sacrificing your wallet.</p>
+		</header>
+		<section class="control-card gacha-control-card" aria-label="Gacha controls">
+			<div class="gacha-controls">
+				<label class="percent-field">
+					<span>SSR probability</span>
+					<span class="percent-input-row">
+						<input id="ssr-input" type="number" min="0" max="100" step="0.1" value="3" inputmode="decimal" aria-describedby="ssr-error expected-ssr-line">
+						<span class="percent-suffix">%</span>
+					</span>
+				</label>
+				<div class="button-row">
+					<button class="primary-button" id="pull-button" type="button">10 Pulls</button>
+					<button id="clear-button" type="button">Clear</button>
+				</div>
 			</div>
-		</div>
-		<p class="field-error" id="ssr-error" role="alert" hidden></p>
-		<p class="stats" id="expected-ssr-line" aria-live="polite"></p>
+			<p class="field-error" id="ssr-error" role="alert" hidden></p>
+			<p class="stats expected-line" id="expected-ssr-line" aria-live="polite"></p>
+			<div class="odds-breakdown" role="group" aria-label="Configured rarity probabilities">
+				<span class="odds-chip odds-ssr">SSR <strong id="odds-ssr">3%</strong></span>
+				<span class="odds-chip odds-sr">SR <strong id="odds-sr">19.4%</strong></span>
+				<span class="odds-chip odds-r">R <strong id="odds-r">77.6%</strong></span>
+				<span class="odds-chip odds-ten">At least one SSR in 10 <strong id="ten-pull-chance">26.26%</strong></span>
+			</div>
+		</section>
 		<p class="status" id="status" aria-live="polite" hidden></p>
+		<div class="results-heading">
+			<h2>Latest ten-pull</h2>
+			<p>Tap a card to view the artwork source.</p>
+		</div>
+		<p class="empty-state" id="results-empty">Your pulls will appear here. The void is judging your restraint.</p>
 		<ol class="results-grid" id="results" aria-label="Pull results"></ol>
-		<section class="summary" aria-label="Pull summary">
+		<section class="summary" id="summary" aria-label="Pull summary" hidden>
 			<p class="stats" id="batch-stats"></p>
 			<p class="stats" id="session-stats"></p>
 		</section>
 	</main>
-	<script src="gacha.js?v=10"></script>
+	<script src="gacha.js?v=11"></script>
 </body>
 </html>

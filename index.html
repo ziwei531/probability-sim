@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<title>Coin Flip</title>
 	<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
-	<link rel="stylesheet" href="styles.css?v=8">
+	<link rel="stylesheet" href="styles.css?v=9">
 	<script>
 		// Embed mode ( ?embed=1 ) hides the simulator nav and trims page chrome
 		// so the app sits cleanly inside a parent page's iframe ( game corner ).
@@ -19,31 +19,46 @@
 		<a class="nav-link active" href="index.html" aria-current="page">Coin Flip</a>
 		<a class="nav-link" href="gacha.html">Gacha Simulator</a>
 	</nav>
-	<main class="app">
-		<h1>Coin Flip</h1>
+	<main class="app coin-app">
+		<header class="app-header">
+			<p class="eyebrow">Probability playground</p>
+			<h1>Coin Flip</h1>
+			<p class="app-intro">Bias the coin, then watch randomness prove—or betray—your odds.</p>
+		</header>
 		<div class="scene">
+			<button class="coin-mover" id="coin" type="button" aria-label="Flip the coin">
+				<span class="coin">
+					<span class="coin-face coin-heads" aria-hidden="true">H</span>
+					<span class="coin-face coin-tails" aria-hidden="true">T</span>
+				</span>
+			</button>
 			<div class="coin-shadow" aria-hidden="true"></div>
-			<div class="coin-mover" id="coin" role="button" tabindex="0" aria-label="Flip the coin">
-				<div class="coin">
-					<div class="coin-face coin-heads" aria-hidden="true">H</div>
-					<div class="coin-face coin-tails" aria-hidden="true">T</div>
-				</div>
+		</div>
+		<section class="control-card coin-controls" aria-label="Coin controls">
+			<div class="controls">
+				<label class="percent-field">
+					<span>Heads</span>
+					<span class="percent-input-row">
+						<input id="heads-input" type="number" min="0" max="100" step="0.01" value="50" inputmode="decimal" aria-describedby="coin-error" required>
+						<span class="percent-suffix">%</span>
+					</span>
+				</label>
+				<label class="percent-field">
+					<span>Tails</span>
+					<span class="percent-input-row">
+						<input id="tails-input" type="number" min="0" max="100" step="0.01" value="50" inputmode="decimal" aria-describedby="coin-error" required>
+						<span class="percent-suffix">%</span>
+					</span>
+				</label>
 			</div>
-		</div>
-		<div class="controls">
-			<label class="percent-field">
-				<span>Heads %</span>
-				<input id="heads-input" type="number" min="0" max="100" step="0.01" value="50" inputmode="decimal">
-			</label>
-			<label class="percent-field">
-				<span>Tails %</span>
-				<input id="tails-input" type="number" min="0" max="100" step="0.01" value="50" inputmode="decimal">
-			</label>
-		</div>
-		<button id="flip-button" type="button">Flip</button>
-		<p class="result" id="result" aria-live="polite"></p>
-		<p class="stats" id="stats">Heads: 0 · Tails: 0</p>
+			<p class="field-error" id="coin-error" role="alert" hidden>Enter a valid percentage before flipping.</p>
+			<button class="primary-button" id="flip-button" type="button">Flip the coin</button>
+		</section>
+		<section class="result-panel" aria-label="Flip results">
+			<p class="result" id="result" aria-live="polite">Ready when you are.</p>
+			<p class="stats" id="stats">Heads: 0 · Tails: 0</p>
+		</section>
 	</main>
-	<script src="script.js?v=4"></script>
+	<script src="script.js?v=5"></script>
 </body>
 </html>

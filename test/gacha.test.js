@@ -83,10 +83,12 @@ function lcgRandom() {
 }
 const trials  = 1000000;
 let ssrCount  = 0;
-for ( let i = 0; i < trials; i += 1 ) {
+let trialIndex = 0;
+while ( trialIndex < trials ) {
 	if ( assignRarity( 3, lcgRandom() * 100 ) === "SSR" ) {
 		ssrCount += 1;
 	}
+	trialIndex += 1;
 }
 checkClose( "observed SSR % at 3% over 1M rolls", ( ssrCount / trials ) * 100, 3, 0.3 );
 
@@ -99,25 +101,43 @@ check( "expectedPullsPerSsr( 0 ) is Infinity", expectedPullsPerSsr( 0 ), Infinit
 // expectedSsrSentence: wording stays testable and honest about "on average";
 // the expectation rounds to the nearest whole pull for display, and the 0% /
 // 100% endpoints get certainty-appropriate sentences instead of ∞ or "1 pull"
-check( "expectedSsrSentence( 3 )", expectedSsrSentence( 3 ), "For every 33 pulls, you will get an SSR on average." );
-check( "expectedSsrSentence( 3.75 )", expectedSsrSentence( 3.75 ), "For every 27 pulls, you will get an SSR on average." );
-check( "expectedSsrSentence( 7 )", expectedSsrSentence( 7 ), "For every 14 pulls, you will get an SSR on average." );
-check( "expectedSsrSentence( 0.5 )", expectedSsrSentence( 0.5 ), "For every 200 pulls, you will get an SSR on average." );
-check( "expectedSsrSentence( 8 ) rounds exact half up", expectedSsrSentence( 8 ), "For every 13 pulls, you will get an SSR on average." );
-check( "expectedSsrSentence( 40 ) rounds exact half up", expectedSsrSentence( 40 ), "For every 3 pulls, you will get an SSR on average." );
+check( "expectedSsrSentence( 3 )", expectedSsrSentence( 3 ), "With SSR set to 3%, expect about 33 pulls per SSR." );
+check( "expectedSsrSentence( 3.75 )", expectedSsrSentence( 3.75 ), "With SSR set to 3.75%, expect about 27 pulls per SSR." );
+check( "expectedSsrSentence( 7 )", expectedSsrSentence( 7 ), "With SSR set to 7%, expect about 14 pulls per SSR." );
+check( "expectedSsrSentence( 0.5 )", expectedSsrSentence( 0.5 ), "With SSR set to 0.5%, expect about 200 pulls per SSR." );
+check( "expectedSsrSentence( 8 ) rounds exact half up", expectedSsrSentence( 8 ), "With SSR set to 8%, expect about 13 pulls per SSR." );
+check( "expectedSsrSentence( 40 ) rounds exact half up", expectedSsrSentence( 40 ), "With SSR set to 40%, expect about 3 pulls per SSR." );
 check( "expectedSsrSentence( 100 )", expectedSsrSentence( 100 ), "Every pull is an SSR." );
-check( "expectedSsrSentence( 0 )", expectedSsrSentence( 0 ), "At a 0% SSR rate, an SSR never appears." );
+check( "expectedSsrSentence( 0 )", expectedSsrSentence( 0 ), "With SSR set to 0%, an SSR never appears." );
+
+// The displayed rarity breakdown must match the assignment thresholds exactly
+const ratesAtThreePercent = rarityPercentages( 3 );
+checkClose( "rarityPercentages( 3 ).ssr", ratesAtThreePercent.ssr, 3, 1e-12 );
+checkClose( "rarityPercentages( 3 ).sr", ratesAtThreePercent.sr, 19.4, 1e-12 );
+checkClose( "rarityPercentages( 3 ).r", ratesAtThreePercent.r, 77.6, 1e-12 );
+checkClose( "rarity percentages sum to 100", ratesAtThreePercent.ssr + ratesAtThreePercent.sr + ratesAtThreePercent.r, 100, 1e-12 );
+
+// Independent binomial complement: at least one SSR in ten pulls at 3%
+checkClose( "chanceAtLeastOneSsr( 3, 10 )", chanceAtLeastOneSsr( 3, 10 ), 26.257587310507174, 1e-12 );
+check( "chanceAtLeastOneSsr( 0, 10 )", chanceAtLeastOneSsr( 0, 10 ), 0 );
+check( "chanceAtLeastOneSsr( 100, 10 )", chanceAtLeastOneSsr( 100, 10 ), 100 );
+
+// A session observed rate is only meaningful while the configured rate stays fixed
+check( "didProbabilityChange( 3, 3 )", didProbabilityChange( 3, 3 ), false );
+check( "didProbabilityChange( 3, 3.1 )", didProbabilityChange( 3, 3.1 ), true );
 
 // Empirical geometric mean: first-SSR arrival over many trials must land near
 // the 1 / p theory — this pins the theorem, not just the implementation formula
 let arrivalSum  = 0;
 const arrivalCount = 200000;
-for ( let i = 0; i < arrivalCount; i += 1 ) {
+let arrivalIndex = 0;
+while ( arrivalIndex < arrivalCount ) {
 	let pulls = 0;
 	do {
 		pulls += 1;
 	} while ( assignRarity( 3, lcgRandom() * 100 ) !== "SSR" );
 	arrivalSum += pulls;
+	arrivalIndex += 1;
 }
 checkClose( "mean pulls to first SSR over 200k trials", arrivalSum / arrivalCount, 100 / 3, 0.5 );
 

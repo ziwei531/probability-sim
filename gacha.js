@@ -3,7 +3,7 @@
 // Gacha odds live as percentages; the user only configures the SSR rate, and SR
 // takes 20% of the leftover while R takes the rest, so the three always sum to 100
 
-const SR_SHARE_OF_REMAINDER = 0.20;
+const srShareOfRemainder = 0.20;
 
 function parseSsrPercent( raw ) {
 	// Decimals like 2.5 and 3.75 are accepted; empty, non-numeric, negative, and
@@ -22,10 +22,28 @@ function parseSsrPercent( raw ) {
 	return value;
 }
 
+function rarityPercentages( ssrPercent ) {
+	const srPercent = ( 100 - ssrPercent ) * srShareOfRemainder;
+	return {
+		  ssr: ssrPercent
+		, sr : srPercent
+		, r  : 100 - ssrPercent - srPercent
+	};
+}
+
+function chanceAtLeastOneSsr( ssrPercent, count ) {
+	const missChance = 1 - ( ssrPercent / 100 );
+	return ( 1 - ( missChance ** count ) ) * 100;
+}
+
+function didProbabilityChange( previousPercent, nextPercent ) {
+	return previousPercent !== nextPercent;
+}
+
 function assignRarity( ssrPercent, roll ) {
 	// roll is [0, 100); SSR wins below the configured rate, SR runs to 20% of the
 	// remainder, and everything else falls to R
-	const srPercent = ( 100 - ssrPercent ) * SR_SHARE_OF_REMAINDER;
+	const { sr: srPercent } = rarityPercentages( ssrPercent );
 	if ( roll < ssrPercent ) {
 		return "SSR";
 	}
@@ -37,12 +55,8 @@ function assignRarity( ssrPercent, roll ) {
 
 function generateBatch( ssrPercent, count, random ) {
 	// Every pull gets its own fresh roll; one shared roll would freeze the whole batch
-	const roll  = random || Math.random;
-	const batch = [];
-	for ( let i = 0; i < count; i += 1 ) {
-		batch.push( assignRarity( ssrPercent, roll() * 100 ) );
-	}
-	return batch;
+	const roll = random ?? Math.random;
+	return Array.from( { length: count }, () => assignRarity( ssrPercent, roll() * 100 ) );
 }
 
 function tallyBatch( rarities ) {
@@ -68,22 +82,22 @@ function expectedSsrSentence( ssrPercent ) {
 	// 100% rate guarantees one, so both get honest sentences instead of "∞" or
 	// a misleading "on average"; display rounds the exact expectation
 	if ( ssrPercent === 0 ) {
-		return "At a 0% SSR rate, an SSR never appears.";
+		return "With SSR set to 0%, an SSR never appears.";
 	}
 	if ( ssrPercent === 100 ) {
 		return "Every pull is an SSR.";
 	}
 	const pulls = Math.round( expectedPullsPerSsr( ssrPercent ) );
-	return `For every ${ pulls } pulls, you will get an SSR on average.`;
+	return `With SSR set to ${ ssrPercent }%, expect about ${ pulls } pulls per SSR.`;
 }
 
 /* ==== DOM WIRING ==== */
 
-const PULL_COUNT = 10;
+const pullCount = 10;
 
 // One bundled artwork serves every pull so the simulator never touches the image
 // API at runtime; rarity is still assigned independently, exactly as before
-const BUNDLED_IMAGE = {
+const bundledImage = {
 	  id        : 6881
 	, url       : "assets/gacha-waifu.jpg"
 	, sourceUrl : "https://www.pixiv.net/en/artworks/93407462"
@@ -108,6 +122,24 @@ const resultsList      = document.querySelector( "#results" );
 const batchStatsLine   = document.querySelector( "#batch-stats" );
 const sessionStatsLine = document.querySelector( "#session-stats" );
 const expectedSsrLine   = document.querySelector( "#expected-ssr-line" );
+const ssrRateLine       = document.querySelector( "#odds-ssr" );
+const srRateLine        = document.querySelector( "#odds-sr" );
+const rRateLine         = document.querySelector( "#odds-r" );
+const tenPullChanceLine = document.querySelector( "#ten-pull-chance" );
+const resultsEmptyLine  = document.querySelector( "#results-empty" );
+const summary           = document.querySelector( "#summary" );
+
+function formatPercentage( value ) {
+	return `${ Number( value.toFixed( 2 ) ) }%`;
+}
+
+function updateOddsBreakdown( ssrPercent ) {
+	const rates = rarityPercentages( ssrPercent );
+	ssrRateLine.textContent       = formatPercentage( rates.ssr );
+	srRateLine.textContent        = formatPercentage( rates.sr );
+	rRateLine.textContent         = formatPercentage( rates.r );
+	tenPullChanceLine.textContent = formatPercentage( chanceAtLeastOneSsr( ssrPercent, pullCount ) );
+}
 
 function validateInput() {
 	// Invalid percentages disable pulling and explain why; nothing is silently clamped
@@ -119,11 +151,15 @@ function validateInput() {
 		expectedSsrLine.hidden = true;
 		return;
 	}
+	if ( didProbabilityChange( state.ssrPercent, parsed ) ) {
+		clearResults();
+	}
 	state.ssrPercent            = parsed;
 	pullButton.disabled         = false;
 	errorLine.hidden            = true;
 	expectedSsrLine.textContent = expectedSsrSentence( parsed );
 	expectedSsrLine.hidden      = false;
+	updateOddsBreakdown( parsed );
 }
 
 function renderResults( results ) {
@@ -185,28 +221,32 @@ function runPull() {
 	batchStatsLine.textContent   = "";
 	sessionStatsLine.textContent = "";
 	// Rarity never depends on artwork: rolls happen first, then the bundled image pairs on
-	const rarities = generateBatch( ssrPercent, PULL_COUNT );
+	const rarities = generateBatch( ssrPercent, pullCount );
 	const results  = rarities.map( ( rarity ) => ( {
 		  rarity : rarity
-		, image  : BUNDLED_IMAGE
+		, image  : bundledImage
 	} ) );
-	const tally  = tallyBatch( rarities );
-	state.sessionPulls += PULL_COUNT;
+	const tally    = tallyBatch( rarities );
+	state.sessionPulls += pullCount;
 	state.sessionSsr   += tally.ssr;
 	renderResults( results );
 	renderSummary( tally, ssrPercent );
-	statusLine.textContent = `Done — ${tally.ssr} SSR, ${tally.sr} SR, ${tally.r} R.`;
-	statusLine.hidden      = false;
+	resultsEmptyLine.hidden = true;
+	summary.hidden          = false;
+	statusLine.textContent  = `Done — ${tally.ssr} SSR, ${tally.sr} SR, ${tally.r} R.`;
+	statusLine.hidden       = false;
 }
 
 function clearResults() {
 	// Clears displayed results and resets the session tally; the percentage stays
 	resultsList.replaceChildren();
+	resultsEmptyLine.hidden      = false;
+	summary.hidden               = true;
 	batchStatsLine.textContent   = "";
 	sessionStatsLine.textContent = "";
-	statusLine.hidden = true;
-	state.sessionPulls = 0;
-	state.sessionSsr   = 0;
+	statusLine.hidden            = true;
+	state.sessionPulls           = 0;
+	state.sessionSsr             = 0;
 }
 
 ssrInput.addEventListener( "input", validateInput );
@@ -215,4 +255,4 @@ clearButton.addEventListener( "click", clearResults );
 validateInput();
 
 // Expose the pure functions so node can test them without a DOM
-window.gachaSim = { parseSsrPercent, assignRarity, generateBatch, tallyBatch, expectedPullsPerSsr, expectedSsrSentence };
+window.gachaSim = { parseSsrPercent, rarityPercentages, chanceAtLeastOneSsr, didProbabilityChange, assignRarity, generateBatch, tallyBatch, expectedPullsPerSsr, expectedSsrSentence };
