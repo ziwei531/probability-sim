@@ -17,6 +17,7 @@ Quick reference:
 - Comments explain WHY, single-line `//`, capitalised start
 - Pre-commit checklist at the end of the preference doc — run it before
   committing
+- Git commit messages: follow `git-commit-convention.md`.
 
 ## Project conventions (this repo)
 
