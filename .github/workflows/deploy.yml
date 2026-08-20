@@ -16,7 +16,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Run tests
+        run: |
+          node test/math.test.js
+          node test/coin-dom.test.js
+          node test/gacha.test.js
+          node test/gacha-dom.test.js
+
   deploy:
+    needs: test
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
