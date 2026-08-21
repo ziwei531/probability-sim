@@ -118,7 +118,7 @@ const pullCount = 10;
 // API at runtime; rarity is still assigned independently, exactly as before
 const bundledImage = {
 	  id        : 6881
-	, url       : "assets/gacha-waifu.jpg"
+	, url       : "assets/gacha-waifu.jpg?v=__BUILD_VERSION__"
 	, sourceUrl : "https://www.pixiv.net/en/artworks/93407462"
 	, artistName: "FALL"
 	, width     : 369

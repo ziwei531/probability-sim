@@ -5,7 +5,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<title>Gacha Simulator · Probability Sim</title>
 	<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
-	<link rel="stylesheet" href="styles/styles.css?v=10">
+	<link rel="stylesheet" href="styles/styles.css?v=__BUILD_VERSION__">
+	<script>
+		const styleUrl = new URL( "styles/styles.css?v=__BUILD_VERSION__", document.baseURI );
+		styleUrl.searchParams.set( "cache", Date.now().toString( 36 ) );
+		document.querySelector( "link[rel=stylesheet]" ).href = styleUrl;
+	</script>
 	<script>
 		// Embed mode ( ?embed=1 ) hides the simulator nav and trims page chrome
 		// so the app sits cleanly inside a parent page's iframe ( game corner ).
@@ -76,6 +81,12 @@
 			<p class="stats" id="session-stats"></p>
 		</section>
 	</main>
-	<script src="js/gacha.js?v=11"></script>
+	<script>
+		const gachaScriptUrl = new URL( "js/gacha.js?v=__BUILD_VERSION__", document.baseURI );
+		gachaScriptUrl.searchParams.set( "cache", Date.now().toString( 36 ) );
+		const gachaScript = document.createElement( "script" );
+		gachaScript.src = gachaScriptUrl;
+		document.body.appendChild( gachaScript );
+	</script>
 </body>
 </html>

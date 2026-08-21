@@ -64,7 +64,8 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 
 - `index.html` / `views/coin-flip.html` / `js/script.js` — coin flip
 - `views/gacha.html` / `js/gacha.js` — gacha simulator source
-- `js/view-loader.js` — mounts the selected HTML view
+- `js/view-loader.js` — mounts the selected HTML view and refreshes runtime assets
+- `scripts/prepare-pages.py` — fingerprints the GitHub Pages deployment artifact
 - `styles/styles.css` — shared design tokens, nav, and page styles
 - `assets/gacha-waifu.jpg` — bundled gacha artwork
 - `test/` — node test harnesses
@@ -82,6 +83,12 @@ The presets are an explicitly simplified model, not a claim that the site reprod
 Sources: [Gyattcha recruitment FAQ](https://www.gyattcha.com/en/banners/),
 [Nikke.gg December 2024 patch notes](https://nikke.gg/december-26-patch-notes/),
 and [Nikke.gg third-anniversary patch notes](https://nikke.gg/october-30-update-patch-notes/).
+
+## Deployment caching
+
+GitHub Pages does not provide a reliable per-deployment cache purge or custom response-header control. The deployment workflow therefore fingerprints text-asset URLs with the commit SHA, while the runtime loaders add a fresh reload token when fetching views, styles, scripts, and local images.
+
+This minimizes stale deployments, but a browser may still display an already-cached old HTML shell until its CDN/browser cache expires; a hard refresh or a new query string remains the only absolute manual override.
 
 ## Conventions
 

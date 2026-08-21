@@ -40,10 +40,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Prepare Pages artifact
-        run: |
-          mkdir -p _site
-          cp index.html views/gacha.html _site/
-          cp -R assets js styles views _site/
+        env:
+          DEPLOY_VERSION: ${{ github.sha }}
+        run: python scripts/prepare-pages.py _site "$DEPLOY_VERSION"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
