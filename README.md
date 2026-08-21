@@ -26,9 +26,8 @@ step, no runtime API calls.
 
 ### Gacha Simulator
 
-- Set an SSR probability (0–100%, decimals welcome) and pull 10 cards
-- Choose Normal Recruit or UR Pickup; both label the Pilgrim-equivalent slice as UR
-- Normal Recruit defaults to 4% SSR / 0.5% UR; UR Pickup defaults to 4% SSR / 1% UR
+- Set SSR and UR probabilities directly (0–100%, decimals welcome) and pull 10 cards
+- Defaults are 4% SSR and 0.5% UR; adjust either percentage manually for any pool
 - UR is a tagged slice inside SSR, so its configurable rate can never exceed SSR
 - Each pull rolls independently: UR first, then other SSR, SR, and R
 - Live probability chips show the full SSR/UR/SR/R breakdown plus the exact chance
@@ -73,11 +72,10 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 
 ## Nikke-inspired model
 
-The presets are an explicitly simplified model, not a claim that the site reproduces every NIKKE pool rule:
+The default values are an explicitly simplified model, not a claim that the site reproduces every NIKKE pool rule:
 
-- Both presets use 4% total SSR, matching the cited general recruitment rate.
-- Normal Recruit uses 0.5% UR as the Pilgrim/Over-spec tagged slice.
-- UR Pickup uses 1% UR as the featured Pilgrim-equivalent slice.
+- The default uses 4% total SSR, matching the cited general recruitment rate.
+- The default uses 0.5% UR as the Pilgrim/Over-spec tagged slice.
 - UR remains inside the 4% SSR band rather than increasing total SSR probability.
 
 Sources: [Gyattcha recruitment FAQ](https://www.gyattcha.com/en/banners/),

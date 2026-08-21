@@ -413,28 +413,6 @@ button:disabled {
 	color: var( --accent );
 }
 
-.pool-field {
-	display: grid;
-	gap: 8px;
-	color: var( --muted );
-	font-size: 0.875rem;
-}
-
-select {
-	min-height: 44px;
-	padding: 8px 12px;
-	border: 1px solid var( --border );
-	border-radius: 8px;
-	background: var( --surface-muted );
-	color: var( --fg );
-	font: inherit;
-}
-
-select:focus-visible {
-	outline: 2px solid var( --accent );
-	outline-offset: 2px;
-}
-
 .gacha-controls {
 	display: grid;
 	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );

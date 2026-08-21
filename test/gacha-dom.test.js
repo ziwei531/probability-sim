@@ -30,8 +30,7 @@ class MockElement {
 }
 
 const elements = new Map( [
-	  [ "#pool-select", new MockElement( "normal" ) ]
-	, [ "#ssr-input", new MockElement( "4" ) ]
+	  [ "#ssr-input", new MockElement( "4" ) ]
 	, [ "#ur-input", new MockElement( "0.5" ) ]
 	, [ "#pull-button", new MockElement() ]
 	, [ "#clear-button", new MockElement() ]

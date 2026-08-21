@@ -1,7 +1,7 @@
 /* ==== PURE MATH (node-testable) ==== */
 
-// Gacha odds live as percentages; the user only configures the SSR rate, and SR
-// takes 20% of the leftover while R takes the rest, so the three always sum to 100
+// Gacha odds live as percentages; SR takes 20% of the leftover while R takes the
+// rest, so the configured SSR and UR rates always produce a complete breakdown
 
 const srShareOfRemainder = 0.20;
 
@@ -126,21 +126,14 @@ const bundledImage = {
 	, isNsfw    : false
 };
 
-const poolPresets = {
-	  normal  : { label: "Normal Recruit", ssrPercent: 4, urPercent: 0.5 }
-	, urPickup : { label: "UR Pickup", ssrPercent: 4, urPercent: 1 }
-};
-
 const state = {
-	  pool         : "normal"
-	, ssrPercent   : poolPresets.normal.ssrPercent
-	, urPercent    : poolPresets.normal.urPercent
+	  ssrPercent   : 4
+	, urPercent    : 0.5
 	, sessionPulls : 0
 	, sessionSsr   : 0
 	, sessionUr    : 0
 };
 
-const poolSelect        = document.querySelector( "#pool-select" );
 const ssrInput         = document.querySelector( "#ssr-input" );
 const urInput          = document.querySelector( "#ur-input" );
 const pullButton       = document.querySelector( "#pull-button" );
@@ -195,15 +188,6 @@ function validateInput() {
 	expectedSsrLine.textContent = `${ expectedSsrSentence( ssrPercent ) } ${ expectedUrSentence( urPercent ) }`;
 	expectedSsrLine.hidden      = false;
 	updateOddsBreakdown( ssrPercent, urPercent );
-}
-
-function applyPoolPreset() {
-	const preset = poolPresets[ poolSelect.value ] ?? poolPresets.normal;
-	state.pool = poolSelect.value;
-	ssrInput.value = preset.ssrPercent;
-	urInput.value  = preset.urPercent;
-	clearResults();
-	validateInput();
 }
 
 function renderResults( results ) {
@@ -296,7 +280,6 @@ function clearResults() {
 	state.sessionUr              = 0;
 }
 
-poolSelect.addEventListener( "change", applyPoolPreset );
 ssrInput.addEventListener( "input", validateInput );
 urInput.addEventListener( "input", validateInput );
 pullButton.addEventListener( "click", runPull );
