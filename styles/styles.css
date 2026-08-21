@@ -393,7 +393,7 @@ button:disabled {
 	gap: 4px;
 	width: 100%;
 	max-width: 34rem;
-	margin-bottom: 8px;
+	margin: 0 auto 8px;
 	border-bottom: 1px solid var( --border );
 }
 
