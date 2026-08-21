@@ -65,6 +65,15 @@ check( "roll at SR boundary is not SR", assignRarity( 3, srBoundary ) === "SR", 
 check( "assignRarity( 3, 25 )", assignRarity( 3, 25 ), "R" );
 check( "assignRarity( 3, 99.99 )", assignRarity( 3, 99.99 ), "R" );
 
+// UR is a tagged subset of SSR; boundaries stay deterministic
+check( "assignRarity( 4, 0.49, 0.5 )", assignRarity( 4, 0.49, 0.5 ), "UR" );
+check( "assignRarity( 4, 0.5, 0.5 )", assignRarity( 4, 0.5, 0.5 ), "SSR" );
+check( "assignRarity( 4, 3.99, 0.5 )", assignRarity( 4, 3.99, 0.5 ), "SSR" );
+check( "assignRarity( 4, 4, 0.5 )", assignRarity( 4, 4, 0.5 ), "SR" );
+const ratesAtFourPercent = rarityPercentages( 4, 0.5 );
+check( "UR never exceeds SSR", ratesAtFourPercent.ur <= ratesAtFourPercent.ssr, true );
+checkClose( "UR + other SSR equals SSR", ratesAtFourPercent.ur + ratesAtFourPercent.ssrOther, ratesAtFourPercent.ssr, 1e-12 );
+
 // generateBatch: exactly ten results, each from its own roll
 const allSsr = generateBatch( 3, 10, () => 0.01 ); // roll 1% -> every pull is SSR
 check( "generateBatch length", allSsr.length, 10 );
@@ -120,7 +129,8 @@ checkClose( "rarity percentages sum to 100", ratesAtThreePercent.ssr + ratesAtTh
 // Independent binomial complement: at least one SSR in ten pulls at 3%
 checkClose( "chanceAtLeastOneSsr( 3, 10 )", chanceAtLeastOneSsr( 3, 10 ), 26.257587310507174, 1e-12 );
 check( "chanceAtLeastOneSsr( 0, 10 )", chanceAtLeastOneSsr( 0, 10 ), 0 );
-check( "chanceAtLeastOneSsr( 100, 10 )", chanceAtLeastOneSsr( 100, 10 ), 100 );
+checkClose( "chanceAtLeastOneSsr( 100, 10 )", chanceAtLeastOneSsr( 100, 10 ), 100, 1e-12 );
+checkClose( "chanceAtLeastOneUr( 0.5, 10 )", chanceAtLeastOneUr( 0.5, 10 ), 4.888986953422814, 1e-12 );
 
 // A session observed rate is only meaningful while the configured rate stays fixed
 check( "didProbabilityChange( 3, 3 )", didProbabilityChange( 3, 3 ), false );

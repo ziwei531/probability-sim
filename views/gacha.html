@@ -26,11 +26,25 @@
 			<p class="app-intro">Set the SSR rate and test your luck—without sacrificing your wallet.</p>
 		</header>
 		<section class="control-card gacha-control-card" aria-label="Gacha controls">
+			<label class="pool-field">
+				<span>Recruitment pool</span>
+				<select id="pool-select">
+					<option value="normal">Normal Recruit</option>
+					<option value="pilgrim">Pilgrim Pickup</option>
+				</select>
+			</label>
 			<div class="gacha-controls">
 				<label class="percent-field">
 					<span>SSR probability</span>
 					<span class="percent-input-row">
-						<input id="ssr-input" type="number" min="0" max="100" step="0.1" value="3" inputmode="decimal" aria-describedby="ssr-error expected-ssr-line">
+						<input id="ssr-input" type="number" min="0" max="100" step="0.1" value="4" inputmode="decimal" aria-describedby="ssr-error expected-ssr-line">
+						<span class="percent-suffix">%</span>
+					</span>
+				</label>
+				<label class="percent-field">
+					<span>UR (Pilgrim) probability</span>
+					<span class="percent-input-row">
+						<input id="ur-input" type="number" min="0" max="100" step="0.1" value="0.5" inputmode="decimal" aria-describedby="ssr-error">
 						<span class="percent-suffix">%</span>
 					</span>
 				</label>
@@ -41,11 +55,13 @@
 			</div>
 			<p class="field-error" id="ssr-error" role="alert" hidden></p>
 			<p class="stats expected-line" id="expected-ssr-line" aria-live="polite"></p>
-			<div class="odds-breakdown" role="group" aria-label="Configured rarity probabilities">
-				<span class="odds-chip odds-ssr">SSR <strong id="odds-ssr">3%</strong></span>
-				<span class="odds-chip odds-sr">SR <strong id="odds-sr">19.4%</strong></span>
-				<span class="odds-chip odds-r">R <strong id="odds-r">77.6%</strong></span>
-				<span class="odds-chip odds-ten">At least one SSR in 10 <strong id="ten-pull-chance">26.26%</strong></span>
+			<div class="odds-breakdown">
+				<span class="odds-chip odds-ssr">SSR <strong id="odds-ssr">4%</strong></span>
+				<span class="odds-chip odds-ur">UR <strong id="odds-ur">0.5%</strong></span>
+				<span class="odds-chip odds-sr">SR <strong id="odds-sr">19.2%</strong></span>
+				<span class="odds-chip odds-r">R <strong id="odds-r">76.8%</strong></span>
+				<span class="odds-chip odds-ten">At least one SSR in 10 <strong id="ten-pull-chance">33.52%</strong></span>
+				<span class="odds-chip odds-ten odds-ur">At least one UR in 10 <strong id="ten-ur-chance">4.89%</strong></span>
 			</div>
 		</section>
 		<p class="status" id="status" aria-live="polite" hidden></p>

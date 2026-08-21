@@ -30,7 +30,9 @@ class MockElement {
 }
 
 const elements = new Map( [
-	  [ "#ssr-input", new MockElement( "3" ) ]
+	  [ "#pool-select", new MockElement( "normal" ) ]
+	, [ "#ssr-input", new MockElement( "4" ) ]
+	, [ "#ur-input", new MockElement( "0.5" ) ]
 	, [ "#pull-button", new MockElement() ]
 	, [ "#clear-button", new MockElement() ]
 	, [ "#ssr-error", new MockElement() ]
@@ -40,9 +42,11 @@ const elements = new Map( [
 	, [ "#session-stats", new MockElement() ]
 	, [ "#expected-ssr-line", new MockElement() ]
 	, [ "#odds-ssr", new MockElement() ]
+	, [ "#odds-ur", new MockElement() ]
 	, [ "#odds-sr", new MockElement() ]
 	, [ "#odds-r", new MockElement() ]
 	, [ "#ten-pull-chance", new MockElement() ]
+	, [ "#ten-ur-chance", new MockElement() ]
 	, [ "#results-empty", new MockElement() ]
 	, [ "#summary", new MockElement() ]
 ] );

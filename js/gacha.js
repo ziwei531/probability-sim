@@ -22,12 +22,14 @@ function parseSsrPercent( raw ) {
 	return value;
 }
 
-function rarityPercentages( ssrPercent ) {
+function rarityPercentages( ssrPercent, urPercent = 0 ) {
 	const srPercent = ( 100 - ssrPercent ) * srShareOfRemainder;
 	return {
-		  ssr: ssrPercent
-		, sr : srPercent
-		, r  : 100 - ssrPercent - srPercent
+		  ur      : urPercent
+		, ssr     : ssrPercent
+		, ssrOther: ssrPercent - urPercent
+		, sr      : srPercent
+		, r       : 100 - ssrPercent - srPercent
 	};
 }
 
@@ -36,14 +38,20 @@ function chanceAtLeastOneSsr( ssrPercent, count ) {
 	return ( 1 - ( missChance ** count ) ) * 100;
 }
 
+function chanceAtLeastOneUr( urPercent, count ) {
+	return chanceAtLeastOneSsr( urPercent, count );
+}
+
 function didProbabilityChange( previousPercent, nextPercent ) {
 	return previousPercent !== nextPercent;
 }
 
-function assignRarity( ssrPercent, roll ) {
-	// roll is [0, 100); SSR wins below the configured rate, SR runs to 20% of the
-	// remainder, and everything else falls to R
-	const { sr: srPercent } = rarityPercentages( ssrPercent );
+function assignRarity( ssrPercent, roll, urPercent = 0 ) {
+	// UR is a tagged slice inside the configured SSR band, never an extra rate
+	const { sr: srPercent } = rarityPercentages( ssrPercent, urPercent );
+	if ( roll < urPercent ) {
+		return "UR";
+	}
 	if ( roll < ssrPercent ) {
 		return "SSR";
 	}
@@ -53,15 +61,15 @@ function assignRarity( ssrPercent, roll ) {
 	return "R";
 }
 
-function generateBatch( ssrPercent, count, random ) {
-	// Every pull gets its own fresh roll; one shared roll would freeze the whole batch
+function generateBatch( ssrPercent, count, random, urPercent = 0 ) {
+	// Every pull gets its own fresh roll; UR remains a subset of SSR
 	const roll = random ?? Math.random;
-	return Array.from( { length: count }, () => assignRarity( ssrPercent, roll() * 100 ) );
+	return Array.from( { length: count }, () => assignRarity( ssrPercent, roll() * 100, urPercent ) );
 }
 
 function tallyBatch( rarities ) {
 	// Counts each rarity so the summary never has to recompute from the DOM
-	const tally = { ssr: 0, sr: 0, r: 0 };
+	const tally = { ur: 0, ssr: 0, sr: 0, r: 0 };
 	for ( const rarity of rarities ) {
 		tally[ rarity.toLowerCase() ] += 1;
 	}
@@ -107,13 +115,23 @@ const bundledImage = {
 	, isNsfw    : false
 };
 
-const state = {
-	  ssrPercent   : 3
-	, sessionPulls : 0
-	, sessionSsr   : 0
+const poolPresets = {
+	  normal  : { label: "Normal Recruit", ssrPercent: 4, urPercent: 0.5 }
+	, pilgrim : { label: "Pilgrim Pickup", ssrPercent: 4, urPercent: 1 }
 };
 
+const state = {
+	  pool         : "normal"
+	, ssrPercent   : poolPresets.normal.ssrPercent
+	, urPercent    : poolPresets.normal.urPercent
+	, sessionPulls : 0
+	, sessionSsr   : 0
+	, sessionUr    : 0
+};
+
+const poolSelect        = document.querySelector( "#pool-select" );
 const ssrInput         = document.querySelector( "#ssr-input" );
+const urInput          = document.querySelector( "#ur-input" );
 const pullButton       = document.querySelector( "#pull-button" );
 const clearButton      = document.querySelector( "#clear-button" );
 const errorLine        = document.querySelector( "#ssr-error" );
@@ -123,9 +141,11 @@ const batchStatsLine   = document.querySelector( "#batch-stats" );
 const sessionStatsLine = document.querySelector( "#session-stats" );
 const expectedSsrLine   = document.querySelector( "#expected-ssr-line" );
 const ssrRateLine       = document.querySelector( "#odds-ssr" );
+const urRateLine        = document.querySelector( "#odds-ur" );
 const srRateLine        = document.querySelector( "#odds-sr" );
 const rRateLine         = document.querySelector( "#odds-r" );
 const tenPullChanceLine = document.querySelector( "#ten-pull-chance" );
+const tenUrChanceLine   = document.querySelector( "#ten-ur-chance" );
 const resultsEmptyLine  = document.querySelector( "#results-empty" );
 const summary           = document.querySelector( "#summary" );
 
@@ -133,33 +153,46 @@ function formatPercentage( value ) {
 	return `${ Number( value.toFixed( 2 ) ) }%`;
 }
 
-function updateOddsBreakdown( ssrPercent ) {
-	const rates = rarityPercentages( ssrPercent );
+function updateOddsBreakdown( ssrPercent, urPercent ) {
+	const rates = rarityPercentages( ssrPercent, urPercent );
 	ssrRateLine.textContent       = formatPercentage( rates.ssr );
+	urRateLine.textContent        = formatPercentage( rates.ur );
 	srRateLine.textContent        = formatPercentage( rates.sr );
 	rRateLine.textContent         = formatPercentage( rates.r );
 	tenPullChanceLine.textContent = formatPercentage( chanceAtLeastOneSsr( ssrPercent, pullCount ) );
+	tenUrChanceLine.textContent  = formatPercentage( chanceAtLeastOneUr( urPercent, pullCount ) );
 }
 
 function validateInput() {
-	// Invalid percentages disable pulling and explain why; nothing is silently clamped
-	const parsed = parseSsrPercent( ssrInput.value );
-	if ( parsed === null ) {
+	// UR is a labelled slice of SSR; reject any configuration that exceeds SSR
+	const ssrPercent = parseSsrPercent( ssrInput.value );
+	const urPercent  = parseSsrPercent( urInput.value );
+	if ( ssrPercent === null || urPercent === null || urPercent > ssrPercent ) {
 		pullButton.disabled    = true;
-		errorLine.textContent  = "Enter a percentage between 0 and 100.";
+		errorLine.textContent  = urPercent > ssrPercent ? "UR cannot exceed the SSR rate." : "Enter valid SSR and UR percentages.";
 		errorLine.hidden       = false;
 		expectedSsrLine.hidden = true;
 		return;
 	}
-	if ( didProbabilityChange( state.ssrPercent, parsed ) ) {
+	if ( didProbabilityChange( state.ssrPercent, ssrPercent ) || didProbabilityChange( state.urPercent, urPercent ) ) {
 		clearResults();
 	}
-	state.ssrPercent            = parsed;
+	state.ssrPercent            = ssrPercent;
+	state.urPercent             = urPercent;
 	pullButton.disabled         = false;
 	errorLine.hidden            = true;
-	expectedSsrLine.textContent = expectedSsrSentence( parsed );
+	expectedSsrLine.textContent = expectedSsrSentence( ssrPercent );
 	expectedSsrLine.hidden      = false;
-	updateOddsBreakdown( parsed );
+	updateOddsBreakdown( ssrPercent, urPercent );
+}
+
+function applyPoolPreset() {
+	const preset = poolPresets[ poolSelect.value ] ?? poolPresets.normal;
+	state.pool = poolSelect.value;
+	ssrInput.value = preset.ssrPercent;
+	urInput.value  = preset.urPercent;
+	clearResults();
+	validateInput();
 }
 
 function renderResults( results ) {
@@ -203,17 +236,18 @@ function renderResults( results ) {
 	resultsList.appendChild( fragment );
 }
 
-function renderSummary( tally, ssrPercent ) {
+function renderSummary( tally, ssrPercent, urPercent ) {
 	// Batch stats cover this ten-pull; session stats show the running observed rate
-	batchStatsLine.textContent = `This batch — SSR: ${tally.ssr} · SR: ${tally.sr} · R: ${tally.r} · configured SSR rate: ${ssrPercent}%`;
-	const sessionRate = state.sessionPulls === 0 ? 0 : ( state.sessionSsr / state.sessionPulls ) * 100;
-	sessionStatsLine.textContent = `Session — pulls: ${state.sessionPulls} · SSR: ${state.sessionSsr} · observed SSR rate: ${sessionRate.toFixed( 1 )}% (experimental)`;
+	batchStatsLine.textContent = `This batch — UR: ${tally.ur} · SSR: ${tally.ssr} · SR: ${tally.sr} · R: ${tally.r} · configured UR rate: ${urPercent}% / SSR rate: ${ssrPercent}%`;
+	const sessionUrRate = state.sessionPulls === 0 ? 0 : ( state.sessionUr / state.sessionPulls ) * 100;
+	sessionStatsLine.textContent = `Session — pulls: ${state.sessionPulls} · UR: ${state.sessionUr} · other SSR: ${state.sessionSsr} · observed UR rate: ${sessionUrRate.toFixed( 1 )}% (experimental)`;
 }
 
 function runPull() {
 	// The batch is instant and fully local, so every click simply rolls a fresh ten-pull
 	const ssrPercent = parseSsrPercent( ssrInput.value );
-	if ( ssrPercent === null ) {
+	const urPercent  = parseSsrPercent( urInput.value );
+	if ( ssrPercent === null || urPercent === null || urPercent > ssrPercent ) {
 		validateInput();
 		return;
 	}
@@ -221,7 +255,7 @@ function runPull() {
 	batchStatsLine.textContent   = "";
 	sessionStatsLine.textContent = "";
 	// Rarity never depends on artwork: rolls happen first, then the bundled image pairs on
-	const rarities = generateBatch( ssrPercent, pullCount );
+	const rarities = generateBatch( ssrPercent, pullCount, undefined, urPercent );
 	const results  = rarities.map( ( rarity ) => ( {
 		  rarity : rarity
 		, image  : bundledImage
@@ -229,11 +263,12 @@ function runPull() {
 	const tally    = tallyBatch( rarities );
 	state.sessionPulls += pullCount;
 	state.sessionSsr   += tally.ssr;
+	state.sessionUr    += tally.ur;
 	renderResults( results );
-	renderSummary( tally, ssrPercent );
+	renderSummary( tally, ssrPercent, urPercent );
 	resultsEmptyLine.hidden = true;
 	summary.hidden          = false;
-	statusLine.textContent  = `Done — ${tally.ssr} SSR, ${tally.sr} SR, ${tally.r} R.`;
+	statusLine.textContent  = `Done — ${tally.ur} UR, ${tally.ssr} SSR, ${tally.sr} SR, ${tally.r} R.`;
 	statusLine.hidden       = false;
 }
 
@@ -247,9 +282,12 @@ function clearResults() {
 	statusLine.hidden            = true;
 	state.sessionPulls           = 0;
 	state.sessionSsr             = 0;
+	state.sessionUr              = 0;
 }
 
+poolSelect.addEventListener( "change", applyPoolPreset );
 ssrInput.addEventListener( "input", validateInput );
+urInput.addEventListener( "input", validateInput );
 pullButton.addEventListener( "click", runPull );
 clearButton.addEventListener( "click", clearResults );
 validateInput();
@@ -259,6 +297,7 @@ window.gachaSim = {
 	  parseSsrPercent
 	, rarityPercentages
 	, chanceAtLeastOneSsr
+	, chanceAtLeastOneUr
 	, didProbabilityChange
 	, assignRarity
 	, generateBatch

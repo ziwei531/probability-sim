@@ -29,10 +29,12 @@ step, no runtime API calls.
 ### Gacha Simulator
 
 - Set an SSR probability (0–100%, decimals welcome) and pull 10 cards
-- Each pull rolls independently: SSR at your configured rate, SR takes 20% of
-  the remainder, R takes the rest
-- Live probability chips show the full SSR/SR/R breakdown plus the exact chance
-  of getting at least one SSR in a ten-pull
+- Choose Normal Recruit or Pilgrim Pickup; both label the Pilgrim-equivalent slice as UR
+- Normal Recruit defaults to 4% SSR / 0.5% UR; Pilgrim Pickup defaults to 4% SSR / 1% UR
+- UR is a tagged slice inside SSR, so its configurable rate can never exceed SSR
+- Each pull rolls independently: UR first, then other SSR, SR, and R
+- Live probability chips show the full SSR/UR/SR/R breakdown plus the exact chance
+  of getting at least one SSR or UR in a ten-pull
 - Rarity is assigned before artwork — the image never determines rarity
 - One bundled artwork (`assets/gacha-waifu.jpg`) serves every card,
   so the simulator makes no runtime image requests and never risks rate limits
@@ -69,6 +71,19 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 - `assets/gacha-waifu.jpg` — bundled gacha artwork
 - `test/` — node test harnesses
 - `.github/workflows/deploy.yml` — assembles and deploys the public Pages artifact on push to `main`
+
+## Nikke-inspired model
+
+The presets are an explicitly simplified model, not a claim that the site reproduces every NIKKE pool rule:
+
+- Both presets use 4% total SSR, matching the cited general recruitment rate.
+- Normal Recruit uses 0.5% UR as the Pilgrim/Over-spec tagged slice.
+- Pilgrim Pickup uses 1% UR as the featured Pilgrim-equivalent slice.
+- UR remains inside the 4% SSR band rather than increasing total SSR probability.
+
+Sources: [Gyattcha recruitment FAQ](https://www.gyattcha.com/en/banners/),
+[Nikke.gg December 2024 patch notes](https://nikke.gg/december-26-patch-notes/),
+and [Nikke.gg third-anniversary patch notes](https://nikke.gg/october-30-update-patch-notes/).
 
 ## Conventions
 
