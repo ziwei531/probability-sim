@@ -99,6 +99,17 @@ function expectedSsrSentence( ssrPercent ) {
 	return `With SSR set to ${ ssrPercent }%, expect about ${ pulls } pulls per SSR.`;
 }
 
+function expectedUrSentence( urPercent ) {
+	if ( urPercent === 0 ) {
+		return "With UR set to 0%, a UR never appears.";
+	}
+	if ( urPercent === 100 ) {
+		return "Every pull is a UR.";
+	}
+	const pulls = Math.round( expectedPullsPerSsr( urPercent ) );
+	return `With UR set to ${ urPercent }%, expect about ${ pulls } pulls per UR.`;
+}
+
 /* ==== DOM WIRING ==== */
 
 const pullCount = 10;
@@ -117,7 +128,7 @@ const bundledImage = {
 
 const poolPresets = {
 	  normal  : { label: "Normal Recruit", ssrPercent: 4, urPercent: 0.5 }
-	, pilgrim : { label: "Pilgrim Pickup", ssrPercent: 4, urPercent: 1 }
+	, urPickup : { label: "UR Pickup", ssrPercent: 4, urPercent: 1 }
 };
 
 const state = {
@@ -181,7 +192,7 @@ function validateInput() {
 	state.urPercent             = urPercent;
 	pullButton.disabled         = false;
 	errorLine.hidden            = true;
-	expectedSsrLine.textContent = expectedSsrSentence( ssrPercent );
+	expectedSsrLine.textContent = `${ expectedSsrSentence( ssrPercent ) } ${ expectedUrSentence( urPercent ) }`;
 	expectedSsrLine.hidden      = false;
 	updateOddsBreakdown( ssrPercent, urPercent );
 }
@@ -304,4 +315,5 @@ window.gachaSim = {
 	, tallyBatch
 	, expectedPullsPerSsr
 	, expectedSsrSentence
+	, expectedUrSentence
 };

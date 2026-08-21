@@ -118,6 +118,9 @@ check( "expectedSsrSentence( 8 ) rounds exact half up", expectedSsrSentence( 8 )
 check( "expectedSsrSentence( 40 ) rounds exact half up", expectedSsrSentence( 40 ), "With SSR set to 40%, expect about 3 pulls per SSR." );
 check( "expectedSsrSentence( 100 )", expectedSsrSentence( 100 ), "Every pull is an SSR." );
 check( "expectedSsrSentence( 0 )", expectedSsrSentence( 0 ), "With SSR set to 0%, an SSR never appears." );
+check( "expectedUrSentence( 0.5 )", expectedUrSentence( 0.5 ), "With UR set to 0.5%, expect about 200 pulls per UR." );
+check( "expectedUrSentence( 1 )", expectedUrSentence( 1 ), "With UR set to 1%, expect about 100 pulls per UR." );
+check( "expectedUrSentence( 0 )", expectedUrSentence( 0 ), "With UR set to 0%, a UR never appears." );
 
 // The displayed rarity breakdown must match the assignment thresholds exactly
 const ratesAtThreePercent = rarityPercentages( 3 );

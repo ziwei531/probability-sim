@@ -29,8 +29,8 @@ step, no runtime API calls.
 ### Gacha Simulator
 
 - Set an SSR probability (0–100%, decimals welcome) and pull 10 cards
-- Choose Normal Recruit or Pilgrim Pickup; both label the Pilgrim-equivalent slice as UR
-- Normal Recruit defaults to 4% SSR / 0.5% UR; Pilgrim Pickup defaults to 4% SSR / 1% UR
+- Choose Normal Recruit or UR Pickup; both label the Pilgrim-equivalent slice as UR
+- Normal Recruit defaults to 4% SSR / 0.5% UR; UR Pickup defaults to 4% SSR / 1% UR
 - UR is a tagged slice inside SSR, so its configurable rate can never exceed SSR
 - Each pull rolls independently: UR first, then other SSR, SR, and R
 - Live probability chips show the full SSR/UR/SR/R breakdown plus the exact chance
@@ -78,7 +78,7 @@ The presets are an explicitly simplified model, not a claim that the site reprod
 
 - Both presets use 4% total SSR, matching the cited general recruitment rate.
 - Normal Recruit uses 0.5% UR as the Pilgrim/Over-spec tagged slice.
-- Pilgrim Pickup uses 1% UR as the featured Pilgrim-equivalent slice.
+- UR Pickup uses 1% UR as the featured Pilgrim-equivalent slice.
 - UR remains inside the 4% SSR band rather than increasing total SSR probability.
 
 Sources: [Gyattcha recruitment FAQ](https://www.gyattcha.com/en/banners/),
