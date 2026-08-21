@@ -1,34 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-	<title>Gacha Simulator · Probability Sim</title>
-	<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
-	<link rel="stylesheet" href="styles/styles.css?v=__BUILD_VERSION__">
-	<script>
-		const styleUrl = new URL( "styles/styles.css?v=__BUILD_VERSION__", document.baseURI );
-		styleUrl.searchParams.set( "cache", Date.now().toString( 36 ) );
-		document.querySelector( "link[rel=stylesheet]" ).href = styleUrl;
-	</script>
-	<script>
-		// Embed mode ( ?embed=1 ) hides the simulator nav and trims page chrome
-		// so the app sits cleanly inside a parent page's iframe ( game corner ).
-		if ( new URLSearchParams( location.search ).has( "embed" ) ) {
-			document.documentElement.dataset.embed = "1";
-		}
-	</script>
-</head>
-<body>
 	<nav class="site-nav" aria-label="Simulators">
-		<a class="nav-link" href="index.html">Coin Flip</a>
-		<a class="nav-link active" href="gacha.html" aria-current="page">Gacha Simulator</a>
+		<a class="nav-link" href="index.html" data-view="views/coin-flip.html" data-script="js/script.js">Coin Flip</a>
+		<a class="nav-link active" href="gacha.html" data-view="views/gacha.html" data-script="js/gacha.js" aria-current="page">Gacha Simulator</a>
 	</nav>
 	<main class="app gacha-app">
 		<header class="app-header">
-			<p class="eyebrow">Probability playground</p>
+			<p class="eyebrow">Probability tools</p>
 			<h1>Gacha Simulator</h1>
-			<p class="app-intro">Set the SSR rate and test your luck—without sacrificing your wallet.</p>
+			<p class="app-intro">Set the SSR and UR rates, then run a ten-pull.</p>
 		</header>
 		<section class="control-card gacha-control-card" aria-label="Gacha controls">
 			<div class="gacha-controls">
@@ -65,21 +43,12 @@
 		<p class="status" id="status" aria-live="polite" hidden></p>
 		<div class="results-heading">
 			<h2>Latest ten-pull</h2>
-			<p>Tap a card to view the artwork source.</p>
+			<p>Open a card to view its artwork source.</p>
 		</div>
-		<p class="empty-state" id="results-empty">Your pulls will appear here. The void is judging your restraint.</p>
+		<p class="empty-state" id="results-empty">Your pulls will appear here.</p>
 		<ol class="results-grid" id="results" aria-label="Pull results"></ol>
 		<section class="summary" id="summary" aria-label="Pull summary" hidden>
 			<p class="stats" id="batch-stats"></p>
 			<p class="stats" id="session-stats"></p>
 		</section>
 	</main>
-	<script>
-		const gachaScriptUrl = new URL( "js/gacha.js?v=__BUILD_VERSION__", document.baseURI );
-		gachaScriptUrl.searchParams.set( "cache", Date.now().toString( 36 ) );
-		const gachaScript = document.createElement( "script" );
-		gachaScript.src = gachaScriptUrl;
-		document.body.appendChild( gachaScript );
-	</script>
-</body>
-</html>

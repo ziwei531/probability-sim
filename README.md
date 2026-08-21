@@ -61,9 +61,10 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 
 ## Structure
 
-- `index.html` / `views/coin-flip.html` / `js/script.js` — coin flip
-- `views/gacha.html` / `js/gacha.js` — gacha simulator source
-- `js/view-loader.js` — mounts the selected HTML view and refreshes runtime assets
+- `index.html` / `gacha.html` — public shells for the two simulators
+- `views/coin-flip.html` / `views/gacha.html` — simulator view fragments
+- `js/script.js` / `js/gacha.js` — simulator behavior
+- `js/view-loader.js` — mounts views, switches tabs without a page reload, and refreshes runtime assets
 - `scripts/prepare-pages.py` — fingerprints the GitHub Pages deployment artifact
 - `styles/styles.css` — shared design tokens, nav, and page styles
 - `assets/gacha-waifu.jpg` — bundled gacha artwork

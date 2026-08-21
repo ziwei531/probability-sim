@@ -1,6 +1,9 @@
 const loader = document.currentScript;
 const mount = document.querySelector( "#app" );
-const reloadToken = Date.now().toString( 36 );
+const initialView = loader.dataset.view;
+const initialScript = loader.dataset.script;
+const reloadToken  = Date.now().toString( 36 );
+let scriptSequence = 0;
 
 function freshUrl( rawUrl ) {
 	const url = new URL( rawUrl, document.baseURI );
@@ -20,35 +23,70 @@ function refreshImageUrls() {
 	}
 }
 
-async function loadView() {
-	if ( new URLSearchParams( location.search ).has( "embed" ) ) {
-		document.documentElement.dataset.embed = "1";
-	}
-
-	refreshStylesheetUrls();
-
-	try {
-		const response = await fetch( freshUrl( loader.dataset.view ), { cache: "no-store" } );
-		if ( !response.ok ) {
-			throw new Error( `View request failed with ${ response.status }.` );
+function updateNavigation( viewUrl ) {
+	for ( const link of mount.querySelectorAll( ".nav-link" ) ) {
+		const isActive = link.dataset.view === viewUrl;
+		link.classList.toggle( "active", isActive );
+		if ( isActive ) {
+			link.setAttribute( "aria-current", "page" );
+		} else {
+			link.removeAttribute( "aria-current" );
 		}
-		mount.innerHTML = await response.text();
-		refreshImageUrls();
-		await loadSimulatorScript();
-	} catch ( error ) {
-		mount.innerHTML = "<p>Unable to load the simulator. Refresh to try again.</p>";
-		console.error( error );
 	}
 }
 
-function loadSimulatorScript() {
+function loadSimulatorScript( rawUrl ) {
 	return new Promise( ( resolve, reject ) => {
 		const script = document.createElement( "script" );
-		script.src = freshUrl( loader.dataset.script );
+		script.type = "module";
+		const scriptUrl = freshUrl( rawUrl );
+		scriptUrl.searchParams.set( "module", String( ++scriptSequence ) );
+		script.src = scriptUrl;
 		script.addEventListener( "load", resolve, { once: true } );
 		script.addEventListener( "error", reject, { once: true } );
 		document.body.appendChild( script );
 	} );
 }
 
-loadView();
+async function loadView( viewUrl, scriptUrl, shouldPushHistory = false ) {
+	mount.setAttribute( "aria-busy", "true" );
+	try {
+		const response = await fetch( freshUrl( viewUrl ), { cache: "no-store" } );
+		if ( !response.ok ) {
+			throw new Error( `View request failed with ${ response.status }.` );
+		}
+		mount.innerHTML = await response.text();
+		refreshImageUrls();
+		updateNavigation( viewUrl );
+		await loadSimulatorScript( scriptUrl );
+		if ( shouldPushHistory ) {
+			history.pushState( { viewUrl, scriptUrl }, "", scriptUrl.includes( "gacha" ) ? "gacha.html" : "index.html" );
+		}
+	} catch ( error ) {
+		mount.innerHTML = "<p>Unable to load the simulator. Refresh to try again.</p>";
+		console.error( error );
+	} finally {
+		mount.removeAttribute( "aria-busy" );
+	}
+}
+
+mount.addEventListener( "click", ( event ) => {
+	const link = event.target.closest( ".nav-link" );
+	if ( !link ) {
+		return;
+	}
+	event.preventDefault();
+	loadView( link.dataset.view, link.dataset.script, true );
+} );
+
+window.addEventListener( "popstate", () => {
+	const isGacha = location.pathname.endsWith( "/gacha.html" );
+	loadView( isGacha ? "views/gacha.html" : "views/coin-flip.html", isGacha ? "js/gacha.js" : "js/script.js" );
+} );
+
+if ( new URLSearchParams( location.search ).has( "embed" ) ) {
+	document.documentElement.dataset.embed = "1";
+}
+
+refreshStylesheetUrls();
+loadView( initialView, initialScript );
