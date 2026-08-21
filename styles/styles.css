@@ -156,19 +156,19 @@ h1 {
 
 .coin-mover.flipping {
 	/* The arc carries the coin up and down with gravity easings per segment */
-	animation: toss-arc 1s;
+	animation: toss-arc 0.7s;
 	/* While the toss runs the coin ignores clicks, so a rapid click cannot queue another flip */
 	pointer-events: none;
 }
 
 .coin-mover.flipping .coin {
 	/* The spin runs at constant angular speed, exactly like a real tossed coin */
-	animation: toss-spin 1s linear forwards;
+	animation: toss-spin 0.7s linear forwards;
 }
 
 .coin-mover.flipping ~ .coin-shadow {
 	/* The ground shadow shrinks and fades as the coin rises, returns as it falls */
-	animation: toss-shadow 1s;
+	animation: toss-shadow 0.7s;
 }
 
 .coin-mover:focus-visible {

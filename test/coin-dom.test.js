@@ -100,6 +100,9 @@ if ( headsInput.value !== "49.99" || tailsInput.value !== "50.01" ) {
 }
 
 flipButton.dispatch( "click" );
+if ( resultLine.textContent !== "" ) {
+	throw new Error( "A toss revealed its outcome before the animation completed" );
+}
 if ( !flipButton.disabled || !coin.disabled || !headsInput.disabled || !tailsInput.disabled ) {
 	throw new Error( "A toss did not lock every odds-changing control" );
 }
@@ -109,6 +112,9 @@ if ( !scheduledCompletion ) {
 scheduledCompletion();
 if ( flipButton.disabled || coin.disabled || headsInput.disabled || tailsInput.disabled ) {
 	throw new Error( "Completed toss did not restore valid controls" );
+}
+if ( !/^(Heads|Tails)!$/.test( resultLine.textContent ) ) {
+	throw new Error( "Completed toss did not announce its result" );
 }
 
 console.log( "ALL TESTS PASSED" );

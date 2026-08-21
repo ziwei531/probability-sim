@@ -176,21 +176,20 @@ function flipCoin() {
 	coin.classList.remove( "flipping" );
 	void coin.offsetWidth;
 	coin.classList.add( "flipping" );
-	// Clear before set so identical consecutive outcomes still announce on screen readers
-	resultLine.textContent = "";
-	resultLine.textContent = outcome === "heads" ? "Heads!" : "Tails!";
 	// A fixed timer matches the CSS animation; reduced-motion users skip both the animation and wait
-	const flipDuration = reducedMotionQuery.matches ? 0 : 1000;
+	const flipDuration = reducedMotionQuery.matches ? 0 : 700;
 	setTimeout( () => {
-		finalizeToss( to );
+		finalizeToss( to, outcome );
 	}, flipDuration );
 }
 
-function finalizeToss( to ) {
+function finalizeToss( to, outcome ) {
 	state.isFlipping = false;
 	updateControlAvailability();
 	coin.classList.remove( "flipping" );
 	coinInner.style.transform = `rotateX(${to}deg)`;
+	// Announce the result only after the visual toss has finished
+	resultLine.textContent = outcome === "heads" ? "Heads!" : "Tails!";
 }
 
 headsInput.addEventListener( "input", handleHeadsInput );
