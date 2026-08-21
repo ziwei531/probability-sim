@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html views/gacha.html _site/
-          cp -R assets js styles _site/
+          cp -R assets js styles views _site/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:

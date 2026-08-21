@@ -45,7 +45,7 @@ step, no runtime API calls.
 ## Development
 
 ```bash
-# nothing to install — open index.html, or:
+# serve locally (required for fetched views)
 python3 -m http.server 8000
 ```
 
@@ -62,8 +62,9 @@ node test/gacha-dom.test.js   # session reset and DOM-state regression
 
 ## Structure
 
-- `index.html` / `js/script.js` — coin flip
+- `index.html` / `views/coin-flip.html` / `js/script.js` — coin flip
 - `views/gacha.html` / `js/gacha.js` — gacha simulator source
+- `js/view-loader.js` — mounts the selected HTML view
 - `styles/styles.css` — shared design tokens, nav, and page styles
 - `assets/gacha-waifu.jpg` — bundled gacha artwork
 - `test/` — node test harnesses
