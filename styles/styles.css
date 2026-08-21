@@ -425,10 +425,13 @@ button:disabled {
 	display: flex;
 	align-items: center;
 	gap: 6px;
+	width: 100%;
 }
 
 .percent-input-row input {
-	width: 6rem;
+	flex: 1;
+	width: 100%;
+	min-width: 0;
 }
 
 .percent-suffix {
