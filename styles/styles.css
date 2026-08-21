@@ -99,7 +99,7 @@ body {
 	width: 100%;
 	max-width: 34rem;
 	/* Auto margins centre the app when the page is short and scroll cleanly when it is not */
-	margin: auto 0;
+	margin: auto;
 }
 
 h1 {

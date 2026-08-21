@@ -25,7 +25,7 @@ def main() -> None:
 	output.mkdir( parents=True )
 
 	shutil.copy2( root / "index.html", output / "index.html" )
-	shutil.copy2( root / "views" / "gacha.html", output / "gacha.html" )
+	shutil.copy2( root / "gacha.html", output / "gacha.html" )
 
 	for directory in ( "assets", "js", "styles", "views" ):
 		copy_tree( root / directory, output / directory )
