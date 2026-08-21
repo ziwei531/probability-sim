@@ -57,11 +57,12 @@ node test/math.test.js        # coin-flip math: basis points, mirroring, distrib
 node test/coin-dom.test.js    # invalid input and in-flight control regression
 node test/gacha.test.js       # gacha odds: parsing, boundaries, ten-pull, distribution
 node test/gacha-dom.test.js   # session reset and DOM-state regression
+node test/structure.test.js   # root/view HTML layout invariant
 ```
 
 ## Structure
 
-- `index.html` / `gacha.html` — public shells for the two simulators
+- `index.html` — the only public HTML shell; selects simulator views through the query string
 - `views/coin-flip.html` / `views/gacha.html` — simulator view fragments
 - `js/script.js` / `js/gacha.js` — simulator behavior
 - `js/view-loader.js` — mounts views, switches tabs without a page reload, and refreshes runtime assets

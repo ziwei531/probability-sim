@@ -27,6 +27,7 @@ jobs:
           node test/coin-dom.test.js
           node test/gacha.test.js
           node test/gacha-dom.test.js
+          node test/structure.test.js
 
   deploy:
     needs: test

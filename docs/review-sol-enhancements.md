@@ -21,7 +21,7 @@
 ## Test evidence
 
 - `node --test`: four test files passed, zero failures.
-- `html-validate index.html gacha.html`: zero errors after semantic corrections.
+- `html-validate index.html views/coin-flip.html views/gacha.html`: zero errors after semantic corrections.
 - `csstree-validator styles.css`: zero errors.
 - Duplicate HTML identifiers: zero.
 - JavaScript selectors missing from their corresponding HTML page: zero.

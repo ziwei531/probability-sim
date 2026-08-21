@@ -1,7 +1,8 @@
 const loader = document.currentScript;
 const mount = document.querySelector( "#app" );
-const initialView = loader.dataset.view;
-const initialScript = loader.dataset.script;
+const requestedView = new URLSearchParams( location.search ).get( "view" );
+const initialView = requestedView === "gacha" ? "views/gacha.html" : loader.dataset.view;
+const initialScript = requestedView === "gacha" ? "js/gacha.js" : loader.dataset.script;
 const reloadToken  = Date.now().toString( 36 );
 let scriptSequence = 0;
 
@@ -60,7 +61,8 @@ async function loadView( viewUrl, scriptUrl, shouldPushHistory = false ) {
 		updateNavigation( viewUrl );
 		await loadSimulatorScript( scriptUrl );
 		if ( shouldPushHistory ) {
-			history.pushState( { viewUrl, scriptUrl }, "", scriptUrl.includes( "gacha" ) ? "gacha.html" : "index.html" );
+			const historyUrl = scriptUrl.includes( "gacha" ) ? "index.html?view=gacha" : "index.html";
+			history.pushState( { viewUrl, scriptUrl }, "", historyUrl );
 		}
 	} catch ( error ) {
 		mount.innerHTML = "<p>Unable to load the simulator. Refresh to try again.</p>";
@@ -80,7 +82,7 @@ mount.addEventListener( "click", ( event ) => {
 } );
 
 window.addEventListener( "popstate", () => {
-	const isGacha = location.pathname.endsWith( "/gacha.html" );
+	const isGacha = new URLSearchParams( location.search ).get( "view" ) === "gacha";
 	loadView( isGacha ? "views/gacha.html" : "views/coin-flip.html", isGacha ? "js/gacha.js" : "js/script.js" );
 } );
 
